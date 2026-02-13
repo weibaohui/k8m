@@ -10,9 +10,9 @@ import (
 
 type HelmChart struct {
 	ID             uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	RepositoryID   uint      `gorm:"index:idx_repository_id;not null" json:"repository_id,omitempty"` // 关联仓库ID
+	RepositoryID   uint      `gorm:"index:idx_helm_chart_repository_id;not null" json:"repository_id,omitempty"` // 关联仓库ID
 	RepositoryName string    `gorm:"size:255" json:"repository_name,omitempty"`                       // 关联仓库名称
-	Name           string    `gorm:"size:255;index:idx_name;not null" json:"name,omitempty"`          // Chart名称
+	Name           string    `gorm:"size:255;index:idx_helm_chart_name;not null" json:"name,omitempty"`          // Chart名称
 	LatestVersion  string    `gorm:"size:64" json:"latest_version,omitempty"`                         // 最新版本（冗余字段，优化查询）
 	Description    string    `gorm:"type:text" json:"description,omitempty"`                          // Chart描述
 	Home           string    `gorm:"size:255" json:"home,omitempty"`                                   // 项目主页URL

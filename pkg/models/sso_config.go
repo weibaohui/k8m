@@ -11,7 +11,7 @@ import (
 // SSOConfig SSO配置表
 type SSOConfig struct {
 	ID                 uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	Name               string    `gorm:"size:100;uniqueIndex:idx_name" json:"name,omitempty"` // 配置名称
+	Name               string    `gorm:"size:100;uniqueIndex:idx_sso_config_name" json:"name,omitempty"` // 配置名称
 	Type               string    `gorm:"size:20;default:oidc" json:"type,omitempty"`          // 配置类型
 	ClientID           string    `gorm:"type:text" json:"client_id,omitempty"`                // OAuth2客户端ID
 	ClientSecret       string    `gorm:"type:text" json:"client_secret,omitempty"`            // OAuth2客户端密钥

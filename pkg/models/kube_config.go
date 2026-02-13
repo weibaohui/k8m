@@ -13,16 +13,16 @@ import (
 type KubeConfig struct {
 	ID          uint   `gorm:"primaryKey;autoIncrement" json:"id,omitempty"` // 模板 ID，主键，自增
 	Content     string `gorm:"type:text" json:"content,omitempty"`           // 模板内容，支持大文本存储
-	Server      string `gorm:"size:255;index:idx_server" json:"server,omitempty"`
-	User        string `gorm:"size:255;index:idx_user" json:"user,omitempty"`
-	Cluster     string `gorm:"size:100;index:idx_cluster" json:"cluster,omitempty"` // 类型，最大长度 100
-	Namespace   string `gorm:"size:100;index:idx_namespace" json:"namespace,omitempty"`
-	DisplayName string `gorm:"size:255;index:idx_display_name" json:"display_name,omitempty"`
+	Server      string `gorm:"size:255;index:idx_kube_config_server" json:"server,omitempty"`
+	User        string `gorm:"size:255;index:idx_kube_config_user" json:"user,omitempty"`
+	Cluster     string `gorm:"size:100;index:idx_kube_config_cluster" json:"cluster,omitempty"` // 类型，最大长度 100
+	Namespace   string `gorm:"size:100;index:idx_kube_config_namespace" json:"namespace,omitempty"`
+	DisplayName string `gorm:"size:255;index:idx_kube_config_display_name" json:"display_name,omitempty"`
 	// aws 集群相关
 	AccessKey       string `gorm:"size:255" json:"-"`                    // AWS Access Key ID
 	SecretAccessKey string `gorm:"size:255" json:"-"`                    // AWS Secret Access Key
-	ClusterName     string `gorm:"size:100;index:idx_cluster_name" json:"cluster_name"` // AWS EKS 集群名称
-	Region          string `gorm:"size:50;index:idx_region" json:"region"` // AWS 区域
+	ClusterName     string `gorm:"size:100;index:idx_kube_config_cluster_name" json:"cluster_name"` // AWS EKS 集群名称
+	Region          string `gorm:"size:50;index:idx_kube_config_region" json:"region"` // AWS 区域
 	IsAWSEKS        bool   `json:"is_aws_eks,omitempty"`                   // 标识是否为AWS EKS集群
 	// token 纳管相关 server\token\cadata
 	Token  string `gorm:"type:text" json:"token,omitempty"`   // token 内容，支持大文本存储

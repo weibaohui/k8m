@@ -15,10 +15,10 @@ type AIPrompt struct {
 	ID          uint                   `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
 	Name        string                 `gorm:"size:100;not null" json:"name"`                        // 提示词名称
 	Description string                 `gorm:"size:500" json:"description"`                          // 提示词描述
-	PromptType  constants.AIPromptType `gorm:"size:50;not null;index:idx_prompt_type" json:"prompt_type"` // 提示词类型
+	PromptType  constants.AIPromptType `gorm:"size:50;not null;index:idx_ai_prompt_prompt_type" json:"prompt_type"` // 提示词类型
 	Content     string                 `gorm:"type:text;not null" json:"content"`                    // 提示词内容
-	IsBuiltin   bool                   `gorm:"default:false;index:idx_is_builtin" json:"is_builtin"` // 是否为内置提示词
-	IsEnabled   bool                   `gorm:"default:false;index:idx_is_enabled" json:"is_enabled"` // 是否启用
+	IsBuiltin   bool                   `gorm:"default:false;index:idx_ai_prompt_is_builtin" json:"is_builtin"` // 是否为内置提示词
+	IsEnabled   bool                   `gorm:"default:false;index:idx_ai_prompt_is_enabled" json:"is_enabled"` // 是否启用
 	CreatedAt   time.Time              `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt   time.Time              `json:"updated_at,omitempty"`
 }

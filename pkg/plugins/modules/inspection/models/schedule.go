@@ -17,7 +17,7 @@ import (
 // 可结合数据库或配置管理进行持久化
 type InspectionSchedule struct {
 	ID                  uint         `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	Name                string       `gorm:"size:255;index:idx_name" json:"name"`                 // 巡检任务名称
+	Name                string       `gorm:"size:255;index:idx_inspection_schedule_name" json:"name"`                 // 巡检任务名称
 	Description         string       `gorm:"type:text" json:"description"`                        // 巡检任务描述
 	Clusters            string       `gorm:"type:text" json:"clusters"`                           // 目标集群列表
 	Webhooks            string       `gorm:"type:text" json:"webhooks"`                           // webhook列表

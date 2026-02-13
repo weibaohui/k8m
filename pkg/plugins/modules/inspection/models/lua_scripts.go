@@ -14,14 +14,14 @@ import (
 // 用于存储和管理自定义 Lua 脚本
 type InspectionLuaScript struct {
 	ID             uint                    `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	Name           string                  `gorm:"size:255;uniqueIndex:idx_name" json:"name"`  // 脚本名称，主键
+	Name           string                  `gorm:"size:255;uniqueIndex:idx_lua_script_name" json:"name"`  // 脚本名称，主键
 	Description    string                  `gorm:"type:text" json:"description"`               // 脚本描述
 	Group          string                  `gorm:"size:100" json:"group"`                      // 分组
 	Version        string                  `gorm:"size:64" json:"version"`                     // 版本
 	Kind           string                  `gorm:"size:100" json:"kind"`                       // 类型
 	ScriptType     constants.LuaScriptType `gorm:"size:20" json:"script_type"`                 // 脚本类型 内置/自定义
 	Script         string                  `gorm:"type:text" json:"script"`                    // 脚本内容
-	ScriptCode     string                  `gorm:"size:64;uniqueIndex:idx_script_code" json:"script_code"` // 脚本唯一标识码，每个脚本唯一
+	ScriptCode     string                  `gorm:"size:64;uniqueIndex:idx_lua_script_script_code" json:"script_code"` // 脚本唯一标识码，每个脚本唯一
 	TimeoutSeconds int                     `gorm:"default:60" json:"timeout_seconds"`          // 脚本执行超时时间（秒），默认60秒
 	CreatedAt      time.Time               `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt      time.Time               `json:"updated_at,omitempty"` // Automatically managed by GORM for update time

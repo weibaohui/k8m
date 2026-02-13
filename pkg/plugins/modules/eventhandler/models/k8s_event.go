@@ -12,16 +12,16 @@ import (
 // K8sEvent 中文函数注释：事件转发插件使用的K8s事件模型。
 type K8sEvent struct {
 	ID        int64     `gorm:"primaryKey;autoIncrement" json:"id"`
-	EvtKey    string    `gorm:"size:255;uniqueIndex:idx_evt_key" json:"evt_key"`
-	Cluster   string    `gorm:"size:128;index:idx_cluster" json:"cluster"`
-	Namespace string    `gorm:"size:64;index:idx_namespace" json:"namespace"`
+	EvtKey    string    `gorm:"size:255;uniqueIndex:idx_k8s_event_evt_key" json:"evt_key"`
+	Cluster   string    `gorm:"size:128;index:idx_k8s_event_cluster" json:"cluster"`
+	Namespace string    `gorm:"size:64;index:idx_k8s_event_namespace" json:"namespace"`
 	Name      string    `gorm:"size:255" json:"name"`
 	Type      string    `gorm:"size:16" json:"type"`
 	Reason    string    `gorm:"size:128" json:"reason"`
 	Level     string    `gorm:"size:16" json:"level"`
 	Message   string    `gorm:"type:text" json:"message"`
-	Timestamp time.Time `gorm:"index:idx_timestamp" json:"timestamp"`
-	Processed bool      `gorm:"default:false;index:idx_processed" json:"processed"`
+	Timestamp time.Time `gorm:"index:idx_k8s_event_timestamp" json:"timestamp"`
+	Processed bool      `gorm:"default:false;index:idx_k8s_event_processed" json:"processed"`
 	Attempts  int       `gorm:"default:0" json:"-"`
 	CreatedAt time.Time `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt time.Time `json:"-"`

@@ -11,7 +11,7 @@ import (
 // User 用户导入User
 type User struct {
 	ID               uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	Username         string    `gorm:"size:255;uniqueIndex:idx_username;not null" json:"username,omitempty"`
+	Username         string    `gorm:"size:255;uniqueIndex:idx_user_username;not null" json:"username,omitempty"`
 	Salt             string    `gorm:"size:100;not null" json:"salt,omitempty"`
 	Password         string    `gorm:"size:255;not null" json:"password,omitempty"`
 	GroupNames       string    `gorm:"type:text" json:"group_names,omitempty"`

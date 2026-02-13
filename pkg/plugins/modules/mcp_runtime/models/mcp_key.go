@@ -10,7 +10,7 @@ import (
 
 type McpKey struct {
 	ID          uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	Username    string    `gorm:"size:255;index:idx_username;not null" json:"username,omitempty"`
+	Username    string    `gorm:"size:255;index:idx_mcp_key_username;not null" json:"username,omitempty"`
 	McpKey      string    `gorm:"type:text" json:"mcp_key,omitempty"`
 	Description string    `gorm:"type:text" json:"description,omitempty"`
 	Enabled     bool      `gorm:"default:true" json:"enabled,omitempty"`

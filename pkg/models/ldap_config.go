@@ -13,7 +13,7 @@ import (
 
 type LDAPConfig struct {
 	ID              uint      `gorm:"primaryKey" json:"id"`
-	Name            string    `gorm:"size:50;uniqueIndex:idx_name;not null" json:"name"` // 配置名称
+	Name            string    `gorm:"size:50;uniqueIndex:idx_ldap_config_name;not null" json:"name"` // 配置名称
 	Host            string    `gorm:"size:100;not null" json:"host"`                      // 服务器地址
 	Port            int       `gorm:"not null" json:"port"`                               // 端口
 	BindDN          string    `gorm:"size:100;not null" json:"bind_dn"`                   // 管理员DN

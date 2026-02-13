@@ -10,7 +10,7 @@ import (
 
 type HelmRepository struct {
 	ID                    uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	Name                  string    `gorm:"size:100;uniqueIndex:idx_name;not null" json:"name,omitempty"` // 仓库名称（唯一）
+	Name                  string    `gorm:"size:100;uniqueIndex:idx_helm_repository_name;not null" json:"name,omitempty"` // 仓库名称（唯一）
 	URL                   string    `gorm:"size:255;not null" json:"url,omitempty"`                        // 仓库地址（如 https://charts.example.com）
 	Type                  string    `gorm:"size:20;comment:仓库类型（OCI/HTTP）" json:"type,omitempty"`
 	Description           string    `gorm:"type:text" json:"description,omitempty"` // 仓库描述

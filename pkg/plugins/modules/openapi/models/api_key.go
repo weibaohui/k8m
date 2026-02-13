@@ -10,7 +10,7 @@ import (
 
 type ApiKey struct {
 	ID          uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"` // 主键ID
-	Username    string    `gorm:"size:255;index:idx_username;not null" json:"username,omitempty"` // 用户名
+	Username    string    `gorm:"size:255;index:idx_api_key_username;not null" json:"username,omitempty"` // 用户名
 	Key         string    `gorm:"type:text" json:"key,omitempty"`               // API密钥值，未来可通过比对做校验，可校验是否用户签发，可阻止失效
 	Description string    `gorm:"type:text" json:"description,omitempty"`       // 密钥描述信息
 	ExpiresAt   time.Time `json:"expires_at,omitempty"`                         // 过期时间

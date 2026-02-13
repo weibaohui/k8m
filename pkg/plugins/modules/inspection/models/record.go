@@ -20,9 +20,9 @@ type InspectionRecord struct {
 	ID           uint       `gorm:"primaryKey;autoIncrement" json:"id,omitempty"` // 主键
 	ScheduleID   *uint      `json:"schedule_id,omitempty"`                        // 关联的定时任务ID，可为空（手动触发时为空）
 	ScheduleName string     `gorm:"size:255" json:"schedule_name,omitempty"`      // 巡检任务名称快照
-	Cluster      string     `gorm:"size:100;index:idx_cluster" json:"cluster"`    // 巡检目标集群
+	Cluster      string     `gorm:"size:100;index:idx_inspection_record_cluster" json:"cluster"`    // 巡检目标集群
 	TriggerType  string     `gorm:"size:50" json:"trigger_type"`                  // 触发类型（manual/cron）
-	Status       string     `gorm:"size:50;index:idx_status" json:"status"`       // 执行状态（pending/running/success/failed）
+	Status       string     `gorm:"size:50;index:idx_inspection_record_status" json:"status"`       // 执行状态（pending/running/success/failed）
 	StartTime    time.Time  `json:"start_time"`
 	EndTime      *time.Time `json:"end_time,omitempty"`
 	ErrorCount   int        `json:"error_count"`
@@ -41,7 +41,7 @@ type InspectionRecord struct {
 
 type InspectionScriptResult struct {
 	ID         uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	RecordID   uint      `gorm:"index:idx_record_id" json:"record_id"` // 关联的巡检执行记录ID
+	RecordID   uint      `gorm:"index:idx_script_result_record_id" json:"record_id"` // 关联的巡检执行记录ID
 	ScriptName string    `gorm:"size:255" json:"script_name"`          // 脚本名称
 	ScriptKind string    `gorm:"size:100" json:"script_kind"`          // 脚本资源类型
 	ScriptDesc string    `gorm:"type:text" json:"script_desc"`         // 脚本描述
@@ -49,7 +49,7 @@ type InspectionScriptResult struct {
 	EndTime    time.Time `json:"end_time"`
 	StdOutput  string    `gorm:"type:text" json:"std_output"`          // 脚本标准输出
 	ErrorMsg   string    `gorm:"type:text" json:"error_msg,omitempty"` // 错误信息
-	Cluster    string    `gorm:"size:100;index:idx_cluster" json:"cluster"` // 目标集群
+	Cluster    string    `gorm:"size:100;index:idx_script_result_cluster" json:"cluster"` // 目标集群
 	ScheduleID *uint     `json:"schedule_id,omitempty"`                // 巡检计划ID
 	CreatedAt  time.Time `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt  time.Time `json:"updated_at,omitempty"` // Automatically managed by GORM for update time

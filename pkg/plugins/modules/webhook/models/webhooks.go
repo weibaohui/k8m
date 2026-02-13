@@ -10,7 +10,7 @@ import (
 
 type WebhookReceiver struct {
 	ID           uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	Name         string    `gorm:"size:255;uniqueIndex:idx_name" json:"name,omitempty"` // webhook名称
+	Name         string    `gorm:"size:255;uniqueIndex:idx_webhook_receiver_name" json:"name,omitempty"` // webhook名称
 	Platform     string    `gorm:"size:50" json:"platform,omitempty"`                    // feishu,dingtalk
 	TargetURL    string    `gorm:"size:255" json:"target_url,omitempty"`
 	BodyTemplate string    `gorm:"type:text" json:"body_template,omitempty"` // 发送到webhook的body模板
