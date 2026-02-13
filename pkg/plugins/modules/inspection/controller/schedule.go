@@ -14,6 +14,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection/lua"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/inspection/models"
 	"github.com/weibaohui/k8m/pkg/response"
+	"github.com/weibaohui/k8m/pkg/service"
 	"gorm.io/gorm"
 )
 
@@ -124,6 +125,19 @@ func (s *AdminScheduleController) Save(c *response.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
+
+	//将集群ID转换回原始ID
+	clusterIDs := strings.Split(m.Clusters, ",")
+	realClusterIDs := make([]string, 0)
+	for _, id := range clusterIDs {
+		real_id, err := service.ClusterService().ResolveClusterID(id)
+		if err == nil {
+			realClusterIDs = append(realClusterIDs, real_id)
+		} else {
+			realClusterIDs = append(realClusterIDs, id)
+		}
+	}
+	m.Clusters = strings.Join(realClusterIDs, ",")
 
 	// 检测cron表达式是否正确
 	parser := cron.NewParser(cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow)
