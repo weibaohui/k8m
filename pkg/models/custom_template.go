@@ -14,8 +14,8 @@ type CustomTemplate struct {
 	Name      string    `gorm:"size:255;index:idx_name" json:"name,omitempty"`   // 模板名称，非空，最大长度 255
 	Content   string    `gorm:"type:text" json:"content,omitempty"`              // 模板内容，支持大文本存储
 	Kind      string    `gorm:"size:100;index:idx_kind" json:"kind,omitempty"`   // 模板类型，最大长度 100
-	Cluster   string    `gorm:"size:100;index:idx_cluster" json:"cluster,omitempty"` // 模板类型，最大长度 100
-	IsGlobal  bool      `gorm:"index:idx_is_global" json:"is_global,omitempty"` // 模板类型，最大长度 100
+	Cluster   string    `gorm:"size:100;index:idx_cluster" json:"cluster,omitempty"` // 所属集群，最大长度 100
+	IsGlobal  bool      `gorm:"index:idx_is_global" json:"is_global,omitempty"` // 是否为全局模板
 	CreatedBy string    `gorm:"size:255;index:idx_created_by" json:"created_by,omitempty"` // 创建者
 	CreatedAt time.Time `json:"created_at,omitempty" gorm:"<-:create"`
 	UpdatedAt time.Time `json:"updated_at,omitempty"` // Automatically managed by GORM for update time
