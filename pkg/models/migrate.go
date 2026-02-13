@@ -13,7 +13,7 @@ func init() {
 
 	err := AutoMigrate()
 	if err != nil {
-		klog.Errorf("数据库迁移失败: %v", err.Error())
+		klog.Fatalf("数据库迁移失败，程序无法启动: %v", err)
 	}
 	klog.V(4).Info("数据库自动迁移完成")
 
