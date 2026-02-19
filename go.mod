@@ -48,7 +48,7 @@ require (
 //replace github.com/weibaohui/kom v0.2.29 => github.com/weibaohui/kom v0.2.30-0.20250504082828-c0893145fefa
 
 require (
-	filippo.io/edwards25519 v1.1.0 // indirect
+	filippo.io/edwards25519 v1.1.1 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20250102033503-faa5f7b0171c // indirect
 	github.com/Azure/go-ntlmssp v0.0.0-20221128193559-754e69321358 // indirect
 	github.com/KyleBanks/depth v1.2.1 // indirect
