@@ -11,7 +11,7 @@ var Metadata = plugins.Module{
 		Name:        modules.PluginNameKubeconfigExport,
 		Title:       "Kubeconfig 导出",
 		Version:     "1.0.0",
-		Description: "为集群生产 Kubeconfig 并提供导出功能",
+		Description: "为集群生成 Kubeconfig 并提供导出功能",
 	},
 	Tables: []string{
 		// 本插件不创建额外的数据库表，使用现有 kube_configs 表

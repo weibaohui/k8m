@@ -2,6 +2,7 @@ package cluster
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/response"
@@ -95,6 +96,31 @@ type ExportRequest struct {
 	Description string `json:"description,omitempty"` // 描述
 }
 
+// sanitizeFilename 清理文件名，移除可能破坏响应头的字符
+func sanitizeFilename(input string) string {
+	// 移除控制字符（ASCII < 0x20，不包括 CR LF）和控制字符 DEL
+	var result strings.Builder
+	for _, r := range input {
+		// 允许字母、数字、中文、空格、连字符、下划线、点
+	// 移除引号、分号、反斜杠等可能导致头注入的字符
+		if r >= 32 && r < 127 {
+			// ASCII 可打印字符
+			if r == '"' || r == ';' || r == '\\' || r == '/' {
+				continue // 移除特殊字符
+			}
+			result.WriteRune(r)
+		} else if r > 127 {
+			// 允许中文字符（Unicode 大于 127）
+			result.WriteRune(r)
+		}
+	}
+	resultStr := result.String()
+	if resultStr == "" {
+		resultStr = "kubeconfig"
+	}
+	return resultStr
+}
+
 // Export 导出当前集群的 kubeconfig
 func Export(c *response.Context) {
 	// 获取集群ID
@@ -151,13 +177,19 @@ func Export(c *response.Context) {
 		return
 	}
 
-	// 设置文件名
-	filename := clusterConfig.ClusterName
+	// 设置文件名（清理用户输入，防止头注入）
+	filename := sanitizeFilename(clusterConfig.ClusterName)
 	if req.Namespace != "" {
-		filename += "-" + req.Namespace
+		sanitizedNS := sanitizeFilename(req.Namespace)
+		if sanitizedNS != "" {
+			filename += "-" + sanitizedNS
+		}
 	}
 	if req.Role != "" {
-		filename += "-" + req.Role
+		sanitizedRole := sanitizeFilename(req.Role)
+		if sanitizedRole != "" {
+			filename += "-" + sanitizedRole
+		}
 	}
 	filename += ".yaml"
 

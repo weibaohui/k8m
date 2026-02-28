@@ -13,6 +13,31 @@ import (
 	"k8s.io/klog/v2"
 )
 
+// sanitizeFilename 清理文件名，移除可能破坏响应头的字符
+func sanitizeFilename(input string) string {
+	// 移除控制字符（ASCII < 0x20，不包括 CR LF）和控制字符 DEL）
+	var result strings.Builder
+	for _, r := range input {
+		// 允许字母、数字、中文、空格、连字符、下划线、点
+	// 移除引号、分号、反斜杠等可能导致头注入的字符
+		if r >= 32 && r < 127 {
+			// ASCII 可打印字符
+			if r == '"' || r == ';' || r == '\\' || r == '/' {
+				continue // 移除特殊字符
+			}
+			result.WriteRune(r)
+		} else if r > 127 {
+			// 允许中文字符（Unicode 大于 127）
+			result.WriteRune(r)
+		}
+	}
+	resultStr := result.String()
+	if resultStr == "" {
+		resultStr = "kubeconfig"
+	}
+	return resultStr
+}
+
 // ListTemplates 获取 kubeconfig 模板列表
 func ListTemplates(c *response.Context) {
 	klog.V(6).Infof("获取 kubeconfig 模板列表")
@@ -63,8 +88,6 @@ func GetClusterKubeconfig(c *response.Context) {
 	// 查询数据库中的 kubeconfig（这里需要实现根据 clusterID 查询的逻辑）
 	// 暂时返回空结果
 	amis.WriteJsonError(c, fmt.Errorf("功能暂未实现"))
-
-	klog.V(6).Infof("成功获取集群 %s 的 kubeconfig 信息", clusterID)
 }
 
 // GetKubeConfigByID 根据 ID 获取 kubeconfig（用于导出）
@@ -150,20 +173,23 @@ func ExportKubeConfig(c *response.Context) {
 		return
 	}
 
-	// 设置文件名
-	filename := kubeConfig.DisplayName
+	// 设置文件名（清理用户输入，防止头注入）
+	filename := sanitizeFilename(kubeConfig.DisplayName)
 	if filename == "" {
-		filename = kubeConfig.Cluster
+		filename = sanitizeFilename(kubeConfig.Cluster)
 	}
 	if namespace != "" {
-		filename += "-" + namespace
+		sanitizedNS := sanitizeFilename(namespace)
+		if sanitizedNS != "" {
+			filename += "-" + sanitizedNS
+		}
 	}
 	if role != "" {
-		filename += "-" + role
+		sanitizedRole := sanitizeFilename(role)
+		if sanitizedRole != "" {
+			filename += "-" + sanitizedRole
+		}
 	}
-	// 清理文件名，替换特殊字符
-	filename = strings.ReplaceAll(filename, "/", "-")
-	filename = strings.ReplaceAll(filename, "\\", "-")
 	filename += ".yaml"
 
 	// 设置响应头
