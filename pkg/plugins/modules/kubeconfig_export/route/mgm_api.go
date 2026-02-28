@@ -14,6 +14,10 @@ func RegisterManagementRoutes(mrg chi.Router) {
 	mrg.Get(prefix+"/templates", response.Adapter(mgm.ListTemplates))
 	// 获取集群的 kubeconfig
 	mrg.Get(prefix+"/cluster/{clusterID}/kubeconfig", response.Adapter(mgm.GetClusterKubeconfig))
+	// 根据 ID 获取 kubeconfig
+	mrg.Get(prefix+"/kubeconfig/{id}", response.Adapter(mgm.GetKubeConfigByID))
+	// 导出 kubeconfig（根据 ID）
+	mrg.Post(prefix+"/kubeconfig/{id}/export", response.Adapter(mgm.ExportKubeConfig))
 
 	klog.V(6).Infof("注册kubeconfig_export插件管理路由")
 }

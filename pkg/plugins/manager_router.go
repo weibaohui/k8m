@@ -38,7 +38,9 @@ func (m *Manager) RegisterManagementRoutes(api chi.Router) {
 	}
 	// 为已启用插件注册路由
 	for name, mod := range m.modules {
-		if m.status[name] == StatusRunning && mod.ManagementRouter != nil {
+		status := m.status[name]
+		// 插件状态为已启用、运行中或已停止时注册管理路由
+		if (status == StatusEnabled || status == StatusRunning || status == StatusStopped) && mod.ManagementRouter != nil {
 			klog.V(6).Infof("注册插件 管理 路由: %s", name)
 			mod.ManagementRouter(api)
 		}

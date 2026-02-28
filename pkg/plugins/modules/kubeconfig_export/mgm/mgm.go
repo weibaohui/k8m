@@ -2,12 +2,14 @@ package mgm
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
 	"github.com/weibaohui/k8m/pkg/models"
 	"github.com/weibaohui/k8m/pkg/response"
 	"gorm.io/gorm"
+	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/klog/v2"
 )
 
@@ -97,4 +99,89 @@ func GetKubeConfigByID(c *response.Context) {
 	})
 
 	klog.V(6).Infof("成功获取 kubeconfig ID %s 的内容", idStr)
+}
+
+// ExportKubeConfig 导出 kubeconfig 文件
+func ExportKubeConfig(c *response.Context) {
+	idStr := c.Param("id")
+	if idStr == "" {
+		amis.WriteJsonError(c, fmt.Errorf("kubeconfig ID不能为空"))
+		return
+	}
+
+	klog.V(6).Infof("导出 kubeconfig ID %s", idStr)
+
+	params := dao.BuildParams(c)
+	kc := &models.KubeConfig{}
+	kubeConfig, err := kc.GetOne(params, func(db *gorm.DB) *gorm.DB {
+		return db.Where("id = ?", idStr)
+	})
+	if err != nil || kubeConfig == nil {
+		amis.WriteJsonError(c, fmt.Errorf("kubeconfig 不存在"))
+		return
+	}
+
+	// 获取请求参数（可选的 namespace 和 role）
+	var req struct {
+		Namespace   string `json:"namespace,omitempty"`
+		Role        string `json:"role,omitempty"`
+		Description string `json:"description,omitempty"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		// 忽略参数解析错误，使用默认值
+		req = struct {
+			Namespace   string `json:"namespace,omitempty"`
+			Role        string `json:"role,omitempty"`
+			Description string `json:"description,omitempty"`
+		}{}
+	}
+
+	// 解析 kubeconfig
+	config, err := clientcmd.Load([]byte(kubeConfig.Content))
+	if err != nil {
+		klog.V(6).Infof("解析 kubeconfig 失败: %v", err)
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	// 如果指定了 namespace，添加到 context
+	if req.Namespace != "" {
+		currentContext := config.Contexts[config.CurrentContext]
+		if currentContext != nil {
+			currentContext.Namespace = req.Namespace
+		}
+	}
+
+	// 生成导出的 kubeconfig
+	exportedKubeConfig, err := clientcmd.Write(*config)
+	if err != nil {
+		klog.V(6).Infof("导出 kubeconfig 失败: %v", err)
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	// 设置文件名
+	filename := kubeConfig.DisplayName
+	if filename == "" {
+		filename = kubeConfig.Cluster
+	}
+	if req.Namespace != "" {
+		filename += "-" + req.Namespace
+	}
+	if req.Role != "" {
+		filename += "-" + req.Role
+	}
+	// 清理文件名，替换特殊字符
+	filename = strings.ReplaceAll(filename, "/", "-")
+	filename = strings.ReplaceAll(filename, "\\", "-")
+	filename += ".yaml"
+
+	// 设置响应头
+	c.Header("Content-Disposition", "attachment; filename="+filename)
+	c.Header("Content-Type", "application/x-yaml")
+
+	// 写入文件内容
+	c.Data(200, "application/x-yaml", exportedKubeConfig)
+
+	klog.V(6).Infof("成功导出 kubeconfig ID %s 到文件: %s", idStr, filename)
 }
