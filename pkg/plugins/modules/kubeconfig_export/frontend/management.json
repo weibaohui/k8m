@@ -56,44 +56,49 @@
       "itemActions": [
         {
           "type": "button",
-          "actionType": "dialog",
           "label": "导出 Kubeconfig",
           "level": "primary",
+          "actionType": "dialog",
           "dialog": {
             "title": "导出 Kubeconfig",
             "size": "md",
             "body": {
               "type": "form",
+              "mode": "normal",
               "controls": [
+                {
+                  "type": "static",
+                  "value": "选择要导出的配置选项",
+                  "className": "text-muted"
+                },
                 {
                   "type": "text",
                   "name": "namespace",
                   "label": "限制命名空间",
-                  "placeholder": "可选，留空则无限制"
+                  "placeholder": "可选，留空则无限制",
+                  "clearable": true
                 },
                 {
                   "type": "text",
                   "name": "role",
                   "label": "角色",
-                  "placeholder": "admin, edit, view 等（暂未实现）"
+                  "placeholder": "admin, edit, view 等（暂未实现）",
+                  "clearable": true
                 }
               ],
               "actions": [
                 {
                   "type": "button",
+                  "label": "取消",
+                  "actionType": "cancel"
+                },
+                {
+                  "type": "submit",
                   "label": "导出",
                   "level": "primary",
-                  "onEvent": {
-                    "click": {
-                      "actions": [
-                        {
-                          "actionType": "open",
-                          "url": "/mgm/plugins/kubeconfig_export/kubeconfig/${id}/export?namespace=${namespace}&role=${role}",
-                          "blank": true
-                        }
-                      ]
-                    }
-                  }
+                  "actionType": "url",
+                  "url": "/mgm/plugins/kubeconfig_export/kubeconfig/${id}/export?namespace=${namespace}&role=${role}",
+                  "blank": true
                 }
               ]
             }
