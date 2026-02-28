@@ -333,7 +333,7 @@
                                 "icon": "fas fa-bolt text-primary",
                                 "label": "执行一次",
                                 "actionType": "ajax",
-                                "api": "post:/admin/plugin/cron/${name}/run_once?spec=${spec}"
+                                "api": "post:/admin/plugin/cron/${name}/run_once/spec/${spec|base64Encode}"
                               }
                             ]
                           }

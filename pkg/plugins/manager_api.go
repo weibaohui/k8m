@@ -49,7 +49,7 @@ func (m *Manager) RegisterAdminRoutes(r chi.Router) {
 
 	// 定时任务管理
 	r.Get("/plugin/cron/{name}", response.Adapter(m.ListPluginCrons))
-	r.Post("/plugin/cron/{name}/run_once", response.Adapter(m.RunPluginCronOnce))
+	r.Post("/plugin/cron/{name}/run_once/spec/{spec}", response.Adapter(m.RunPluginCronOnce))
 	// 统一开关接口（生效/关闭）
 	r.Post("/plugin/cron/name/{name}/spec/{spec}/enabled/{enabled}", response.Adapter(m.SetPluginCronEnabled))
 
@@ -618,7 +618,7 @@ func (m *Manager) EnablePluginCron(c *response.Context) {
 // RunPluginCronOnce 立即执行指定插件的一条定时任务一次
 func (m *Manager) RunPluginCronOnce(c *response.Context) {
 	name := c.Param("name")
-	spec := c.Query("spec")
+	spec := c.Param("spec")
 	if spec == "" {
 		var body struct {
 			Spec string `json:"spec"`
@@ -628,6 +628,11 @@ func (m *Manager) RunPluginCronOnce(c *response.Context) {
 	}
 	if spec == "" {
 		amis.WriteJsonError(c, fmt.Errorf("缺少参数: spec"))
+		return
+	}
+	spec, err := utils.UrlSafeBase64Decode(spec)
+	if err != nil {
+		amis.WriteJsonError(c, err)
 		return
 	}
 	if err := m.RunCronOnce(name, spec); err != nil {
