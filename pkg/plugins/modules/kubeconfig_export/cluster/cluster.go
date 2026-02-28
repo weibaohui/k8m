@@ -162,7 +162,7 @@ func Export(c *response.Context) {
 	filename += ".yaml"
 
 	// 设置响应头
-	c.Header("Content-Disposition", "attachment; filename="+filename)
+	c.Header("Content-Disposition", "attachment; filename=\""+filename+"\"")
 	c.Header("Content-Type", "application/octet-stream")
 
 	// 写入文件内容
