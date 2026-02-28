@@ -4,7 +4,7 @@
   "body": [
     {
       "type": "crud",
-      "api": "get:/mgm/plugins/kubeconfig-export/templates",
+      "api": "get:/mgm/plugins/kubeconfig_export/templates",
       "columns": [
         {
           "name": "id",
@@ -63,7 +63,7 @@
             "title": "导出 Kubeconfig",
             "body": {
               "type": "form",
-              "api": "post:/mgm/plugins/kubeconfig-export/kubeconfig/${id}/export",
+              "api": "post:/mgm/plugins/kubeconfig_export/kubeconfig/${id}/export",
               "controls": [
                 {
                   "type": "text",

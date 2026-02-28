@@ -28,7 +28,7 @@ var Metadata = plugins.Module{
 					Title:       "Kubeconfig 管理",
 					Icon:        "fa-solid fa-file-export",
 					EventType:   "custom",
-					CustomEvent: `() => loadJsonPage("/plugins/kubeconfig-export/management")`,
+					CustomEvent: `() => loadJsonPage("/plugins/kubeconfig_export/management")`,
 					Order:       100,
 				},
 			},

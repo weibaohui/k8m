@@ -2,7 +2,6 @@ package route
 
 import (
 	"github.com/go-chi/chi/v5"
-	"github.com/weibaohui/k8m/pkg/plugins/modules"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/kubeconfig_export/mgm"
 	"github.com/weibaohui/k8m/pkg/response"
 	"k8s.io/klog/v2"
@@ -10,7 +9,7 @@ import (
 
 // RegisterManagementRoutes 注册Kubeconfig导出插件的管理类（mgm）路由
 func RegisterManagementRoutes(mrg chi.Router) {
-	prefix := "/plugins/" + modules.PluginNameKubeconfigExport
+	prefix := "/plugins/kubeconfig_export"
 	// 获取 kubeconfig 模板列表
 	mrg.Get(prefix+"/templates", response.Adapter(mgm.ListTemplates))
 	// 获取集群的 kubeconfig
