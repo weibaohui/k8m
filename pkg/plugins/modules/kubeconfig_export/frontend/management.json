@@ -61,9 +61,9 @@
           "level": "primary",
           "dialog": {
             "title": "导出 Kubeconfig",
+            "size": "md",
             "body": {
               "type": "form",
-              "api": "post:/mgm/plugins/kubeconfig_export/kubeconfig/${id}/export",
               "controls": [
                 {
                   "type": "text",
@@ -76,6 +76,24 @@
                   "name": "role",
                   "label": "角色",
                   "placeholder": "admin, edit, view 等（暂未实现）"
+                }
+              ],
+              "actions": [
+                {
+                  "type": "button",
+                  "label": "导出",
+                  "level": "primary",
+                  "onEvent": {
+                    "click": {
+                      "actions": [
+                        {
+                          "actionType": "open",
+                          "url": "/mgm/plugins/kubeconfig_export/kubeconfig/${id}/export?namespace=${namespace}&role=${role}",
+                          "blank": true
+                        }
+                      ]
+                    }
+                  }
                 }
               ]
             }

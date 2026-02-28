@@ -121,20 +121,10 @@ func ExportKubeConfig(c *response.Context) {
 		return
 	}
 
-	// 获取请求参数（可选的 namespace 和 role）
-	var req struct {
-		Namespace   string `json:"namespace,omitempty"`
-		Role        string `json:"role,omitempty"`
-		Description string `json:"description,omitempty"`
-	}
-	if err := c.ShouldBindJSON(&req); err != nil {
-		// 忽略参数解析错误，使用默认值
-		req = struct {
-			Namespace   string `json:"namespace,omitempty"`
-			Role        string `json:"role,omitempty"`
-			Description string `json:"description,omitempty"`
-		}{}
-	}
+	// 获取请求参数（从 URL 查询参数获取）
+	namespace := c.Query("namespace")
+	role := c.Query("role")
+	_ = c.Query("description") // description 参数暂未使用
 
 	// 解析 kubeconfig
 	config, err := clientcmd.Load([]byte(kubeConfig.Content))
@@ -145,10 +135,10 @@ func ExportKubeConfig(c *response.Context) {
 	}
 
 	// 如果指定了 namespace，添加到 context
-	if req.Namespace != "" {
+	if namespace != "" {
 		currentContext := config.Contexts[config.CurrentContext]
 		if currentContext != nil {
-			currentContext.Namespace = req.Namespace
+			currentContext.Namespace = namespace
 		}
 	}
 
@@ -165,11 +155,11 @@ func ExportKubeConfig(c *response.Context) {
 	if filename == "" {
 		filename = kubeConfig.Cluster
 	}
-	if req.Namespace != "" {
-		filename += "-" + req.Namespace
+	if namespace != "" {
+		filename += "-" + namespace
 	}
-	if req.Role != "" {
-		filename += "-" + req.Role
+	if role != "" {
+		filename += "-" + role
 	}
 	// 清理文件名，替换特殊字符
 	filename = strings.ReplaceAll(filename, "/", "-")
@@ -183,5 +173,5 @@ func ExportKubeConfig(c *response.Context) {
 	// 写入文件内容
 	c.Data(200, "application/x-yaml", exportedKubeConfig)
 
-	klog.V(6).Infof("成功导出 kubeconfig ID %s 到文件: %s", idStr, filename)
+	klog.V(6).Infof("成功导出 kubeconfig ID %s 到文件: %s, namespace=%s, role=%s", idStr, filename, namespace, role)
 }
