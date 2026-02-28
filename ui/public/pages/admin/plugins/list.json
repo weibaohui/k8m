@@ -283,7 +283,7 @@
                       {
                         "type": "crud",
                         "api": "get:/admin/plugin/cron/${name}",
-                        "quickSaveItemApi": "/admin/plugin/cron/name/${name}/spec/${spec|base64Encode}/enabled/${registered}",
+                        "quickSaveItemApi": "/admin/plugin/cron/name/${name}/index/${index}/enabled/${registered}",
                         "syncLocation": false,
                         "loadDataOnce": false,
                         "headerToolbar": [
@@ -333,7 +333,7 @@
                                 "icon": "fas fa-bolt text-primary",
                                 "label": "执行一次",
                                 "actionType": "ajax",
-                                "api": "post:/admin/plugin/cron/${name}/run_once/spec/${spec|base64Encode}"
+                                "api": "post:/admin/plugin/cron/${name}/run_once/index/${index}"
                               }
                             ]
                           }
