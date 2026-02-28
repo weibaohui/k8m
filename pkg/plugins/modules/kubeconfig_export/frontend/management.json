@@ -63,52 +63,8 @@
           "api": {
             "method": "get",
             "url": "/mgm/plugins/kubeconfig_export/kubeconfig/${id}/export",
-            "dataType": "blob",
+            "responseType": "blob",
             "downloadName": "${cluster}-kubeconfig.yaml"
-          }
-        },
-        {
-          "type": "button",
-          "label": "高级导出",
-          "level": "default",
-          "icon": "fa-solid fa-gear",
-          "actionType": "dialog",
-          "dialog": {
-            "title": "高级导出 - 指定命名空间",
-            "size": "md",
-            "body": {
-              "type": "form",
-              "controls": [
-                {
-                  "type": "text",
-                  "name": "namespace",
-                  "label": "限制命名空间",
-                  "placeholder": "可选，留空则无限制",
-                  "clearable": true
-                },
-                {
-                  "type": "text",
-                  "name": "role",
-                  "label": "角色",
-                  "placeholder": "admin, edit, view 等（暂未实现）",
-                  "clearable": true
-                }
-              ],
-              "actions": [
-                {
-                  "type": "button",
-                  "label": "导出",
-                  "level": "primary",
-                  "actionType": "ajax",
-                  "api": {
-                    "method": "get",
-                    "url": "/mgm/plugins/kubeconfig_export/kubeconfig/${id}/export?namespace=${namespace}&role=${role}",
-                    "dataType": "blob",
-                    "downloadName": "${cluster}-${namespace||default}-kubeconfig.yaml"
-                  }
-                }
-              ]
-            }
           }
         }
       ]
