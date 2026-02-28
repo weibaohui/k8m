@@ -20,14 +20,14 @@
 
 ### 管理类路由 (mgm)
 
-- `GET /mgm/plugins/kubeconfig-export/templates` - 获取 kubeconfig 模板列表
-- `GET /mgm/plugins/kubeconfig-export/cluster/{clusterID}/kubeconfig` - 获取指定集群的 kubeconfig 信息
-- `GET /mgm/plugins/kubeconfig-export/kubeconfig/{id}` - 根据 ID 获取 kubeconfig
+- `GET /mgm/plugins/kubeconfig_export/templates` - 获取 kubeconfig 模板列表
+- `GET /mgm/plugins/kubeconfig_export/cluster/{clusterID}/kubeconfig` - 获取指定集群的 kubeconfig 信息
+- `GET /mgm/plugins/kubeconfig_export/kubeconfig/{id}` - 根据 ID 获取 kubeconfig
 
 ### 集群类路由 (cluster)
 
-- `POST /k8s/cluster/{clusterID}/plugins/kubeconfig-export/generate` - 为集群生成 kubeconfig
-- `GET /k8s/cluster/{clusterID}/plugins/kubeconfig-export/export` - 导出集群 kubeconfig 文件
+- `POST /k8s/cluster/{clusterID}/plugins/kubeconfig_export/generate` - 为集群生成 kubeconfig
+- `GET /k8s/cluster/{clusterID}/plugins/kubeconfig_export/export` - 导出集群 kubeconfig 文件
 
 ## 插件依赖
 
