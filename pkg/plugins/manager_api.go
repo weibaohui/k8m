@@ -77,12 +77,15 @@ func countMenusRecursive(menus []Menu) int {
 
 // ListPlugins 获取所有已注册插件的Meta与状态
 // 返回插件名称、标题、版本、描述及当前状态（中文）
+// 支持分页查询，通过 page 和 perPage 参数控制
 func (m *Manager) ListPlugins(c *response.Context) {
+
+	params := dao.BuildParams(c)
 
 	items := make([]PluginItemVO, 0, len(m.modules))
 	// 读取数据库中的配置状态
-	params := dao.BuildDefaultParams()
-	cfgs, _, _ := (&models.PluginConfig{}).List(params)
+	dbParams := dao.BuildDefaultParams()
+	cfgs, _, _ := (&models.PluginConfig{}).List(dbParams)
 	cfgVerMap := make(map[string]string, len(cfgs))
 	for _, cfg := range cfgs {
 		cfgVerMap[cfg.Name] = cfg.Version
@@ -119,7 +122,24 @@ func (m *Manager) ListPlugins(c *response.Context) {
 	sort.Slice(items, func(i, j int) bool {
 		return items[i].Name < items[j].Name
 	})
-	amis.WriteJsonListWithTotal(c, int64(len(items)), items)
+
+	// 分页处理
+	total := int64(len(items))
+	start := (params.Page - 1) * params.PerPage
+	if start < 0 {
+		start = 0
+	}
+	if start > len(items) {
+		start = len(items)
+	}
+	end := start + params.PerPage
+	if end > len(items) {
+		end = len(items)
+	}
+	pagedItems := items[start:end]
+
+	klog.V(8).Infof("返回插件列表，第%d页，每页%d条，共%d条", params.Page, params.PerPage, len(pagedItems))
+	amis.WriteJsonListWithTotal(c, total, pagedItems)
 }
 
 // ListPluginMenus 获取所有已启用插件的菜单定义

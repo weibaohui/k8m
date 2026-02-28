@@ -20,4 +20,5 @@ const (
 	PluginNameIstio        = "istio"
 	PluginNameOpenKruise   = "openkruise"
 	PluginNameYamlEditor   = "yaml_editor"
+	PluginNameKubeconfigExport = "kubeconfig_export"
 )

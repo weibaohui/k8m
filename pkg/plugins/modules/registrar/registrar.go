@@ -6,6 +6,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/plugins/modules/demo"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/eventhandler"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/gatewayapi"
+	kubeconfig_export "github.com/weibaohui/k8m/pkg/plugins/modules/kubeconfig_export"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/gllog"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/heartbeat"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/helm"
@@ -122,6 +123,11 @@ func init() {
 			klog.V(6).Infof("注册yaml-editor插件失败: %v", err)
 		} else {
 			klog.V(6).Infof("注册yaml-editor插件成功")
+		}
+		if err := m.Register(kubeconfig_export.Metadata); err != nil {
+			klog.V(6).Infof("注册kubeconfig-export插件失败: %v", err)
+		} else {
+			klog.V(6).Infof("注册kubeconfig-export插件成功")
 		}
 	})
 }
