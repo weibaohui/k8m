@@ -55,20 +55,7 @@
       ],
       "itemActions": [
         {
-          "type": "button",
-          "label": "导出 Kubeconfig",
-          "level": "primary",
-          "icon": "fa-solid fa-download",
-          "onEvent": {
-            "click": {
-              "actions": [
-                {
-                  "actionType": "custom",
-                  "script": "const a = document.createElement('a'); a.href = '/mgm/plugins/kubeconfig_export/kubeconfig/${id}/export'; a.download = '${cluster}-kubeconfig.yaml'; document.body.appendChild(a); a.click(); document.body.removeChild(a);"
-                }
-              ]
-            }
-          }
+          "type": "kubeconfigDownloadButton"
         }
       ]
     }

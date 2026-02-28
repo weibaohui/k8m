@@ -39,6 +39,7 @@ import InspectionSummaryComponent from '@/components/Amis/custom/InspectionSumma
 import InspectionEventListComponent from '@/components/Amis/custom/InspectionEventList.tsx'
 import ClusterSummaryView from "@/components/Amis/custom/cluster/ClusterSummaryView.tsx";
 import ImageBatchUpdateComponent from "@/components/Amis/custom/K8sBatchUpdateImages.tsx";
+import KubeconfigDownloadButton from '@/components/Amis/custom/KubeconfigDownloadButton.tsx';
 // 注册自定义组件
 registerRenderer({ type: 'k8sTextConditions', component: k8sTextConditionsComponent })
 registerRenderer({ type: 'nodeRoles', component: NodeRolesComponent })
@@ -93,6 +94,8 @@ registerRenderer({ type: 'inspectionEventList', component: InspectionEventListCo
 registerRenderer({ type: 'clusterSummaryView', component: ClusterSummaryView })
 //@ts-ignore
 registerRenderer({ type: 'imageBatchUpdate', component: ImageBatchUpdateComponent })
+//@ts-ignore
+registerRenderer({ type: 'kubeconfigDownloadButton', component: KubeconfigDownloadButton })
 
 
 // 注册过滤器
