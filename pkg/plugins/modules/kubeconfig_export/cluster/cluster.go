@@ -163,10 +163,10 @@ func Export(c *response.Context) {
 
 	// 设置响应头
 	c.Header("Content-Disposition", "attachment; filename="+filename)
-	c.Header("Content-Type", "application/x-yaml")
+	c.Header("Content-Type", "application/octet-stream")
 
 	// 写入文件内容
-	c.Data(200, "application/x-yaml", exportedKubeConfig)
+	c.Data(200, "application/octet-stream", exportedKubeConfig)
 
 	klog.V(6).Infof("成功导出集群 %s 的 kubeconfig 到文件: %s", clusterID, filename)
 }

@@ -58,19 +58,27 @@
           "type": "button",
           "label": "导出 Kubeconfig",
           "level": "primary",
+          "icon": "fa-solid fa-download",
+          "actionType": "ajax",
+          "api": {
+            "method": "get",
+            "url": "/mgm/plugins/kubeconfig_export/kubeconfig/${id}/export",
+            "dataType": "blob",
+            "downloadName": "${cluster}-kubeconfig.yaml"
+          }
+        },
+        {
+          "type": "button",
+          "label": "高级导出",
+          "level": "default",
+          "icon": "fa-solid fa-gear",
           "actionType": "dialog",
           "dialog": {
-            "title": "导出 Kubeconfig",
+            "title": "高级导出 - 指定命名空间",
             "size": "md",
             "body": {
               "type": "form",
-              "mode": "normal",
               "controls": [
-                {
-                  "type": "static",
-                  "value": "选择要导出的配置选项",
-                  "className": "text-muted"
-                },
                 {
                   "type": "text",
                   "name": "namespace",
@@ -89,16 +97,15 @@
               "actions": [
                 {
                   "type": "button",
-                  "label": "取消",
-                  "actionType": "cancel"
-                },
-                {
-                  "type": "submit",
                   "label": "导出",
                   "level": "primary",
-                  "actionType": "url",
-                  "url": "/mgm/plugins/kubeconfig_export/kubeconfig/${id}/export?namespace=${namespace}&role=${role}",
-                  "blank": true
+                  "actionType": "ajax",
+                  "api": {
+                    "method": "get",
+                    "url": "/mgm/plugins/kubeconfig_export/kubeconfig/${id}/export?namespace=${namespace}&role=${role}",
+                    "dataType": "blob",
+                    "downloadName": "${cluster}-${namespace||default}-kubeconfig.yaml"
+                  }
                 }
               ]
             }
