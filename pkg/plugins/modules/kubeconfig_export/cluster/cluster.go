@@ -162,11 +162,12 @@ func Export(c *response.Context) {
 	filename += ".yaml"
 
 	// 设置响应头
-	c.Header("Content-Disposition", "attachment; filename=\""+filename+"\"")
-	c.Header("Content-Type", "application/octet-stream")
+	c.Writer.Header().Set("Content-Disposition", "attachment; filename=\""+filename+"\"")
+	c.Writer.Header().Set("Content-Type", "application/octet-stream")
 
 	// 写入文件内容
-	c.Data(200, "application/octet-stream", exportedKubeConfig)
+	c.Writer.WriteHeader(200)
+	_, _ = c.Writer.Write(exportedKubeConfig)
 
 	klog.V(6).Infof("成功导出集群 %s 的 kubeconfig 到文件: %s", clusterID, filename)
 }
