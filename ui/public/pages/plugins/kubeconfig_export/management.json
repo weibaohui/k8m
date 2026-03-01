@@ -1,0 +1,63 @@
+{
+  "type": "page",
+  "title": "Kubeconfig 管理",
+  "body": [
+    {
+      "type": "crud",
+      "api": "get:/mgm/plugins/kubeconfig_export/templates",
+      "columns": [
+        {
+          "name": "id",
+          "label": "ID"
+        },
+        {
+          "name": "display_name",
+          "label": "显示名称"
+        },
+        {
+          "name": "cluster",
+          "label": "集群名称"
+        },
+        {
+          "name": "server",
+          "label": "API 服务器"
+        },
+        {
+          "name": "user",
+          "label": "用户"
+        },
+        {
+          "name": "namespace",
+          "label": "命名空间"
+        },
+        {
+          "name": "is_aws_eks",
+          "label": "AWS EKS",
+          "type": "mapping",
+          "map": {
+            "true": "是",
+            "false": "否"
+          }
+        },
+        {
+          "name": "created_at",
+          "label": "创建时间",
+          "type": "datetime"
+        },
+        {
+          "name": "updated_at",
+          "label": "更新时间",
+          "type": "datetime"
+        }
+      ],
+      "headerToolbar": [
+        "reload"
+      ],
+      "itemActions": [
+        {
+          "type": "kubeconfigDownloadButton"
+        }
+      ]
+    }
+  ]
+}
