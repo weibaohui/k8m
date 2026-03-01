@@ -5,10 +5,17 @@ body {
   /* 防止滚动溢出时的反弹效果 */
   height: 100%;
   /* 设置高度为 100% 以覆盖整个视口 */
-  overflow: hidden;
+  overflow: auto;
   /* 隐藏溢出内容 */
 }
 
+main.ant-layout-content._content_il4rv_44.css-dev-only-do-not-override-mncuj7{
+  min-height: 700px !important;
+}
+
+#translate {
+  display: none;
+}
 .app-wrapper {
   position: relative;
   width: 100%;
