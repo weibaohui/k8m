@@ -1,0 +1,11 @@
+services:
+  k8m:
+    container_name: k8m
+    image: registry.cn-hangzhou.aliyuncs.com/minik8m/k8m
+    restart: always
+    ports:
+      - "3618:3618"
+    environment:
+      TZ: Asia/Shanghai
+    volumes:
+      - ./data:/app/data
