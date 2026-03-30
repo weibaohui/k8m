@@ -246,5 +246,5 @@ A hosted deployment is available on [Fronteir AI](https://fronteir.ai/mcp/weibao
 
 ## 联系我 飞书群
 
-![飞书群](https://foruda.gitee.com/images/1774879913229991117/07b7078d_77493.png "屏幕截图")
+![输入图片说明](https://foruda.gitee.com/images/1774880015525784725/4fd67005_77493.png "屏幕截图")
 
