@@ -238,15 +238,13 @@ pnpm run dev
 
 [eryajf](https://github.com/eryajf):为我们提供了非常好用的github actions，为k8m增加了自动化的发版、构建、发布等功能
 
-## 联系我
 
-微信（大罗马的太阳） 搜索ID：daluomadetaiyang,备注k8m。
-<br><img width="214" alt="Image" src="https://github.com/user-attachments/assets/166db141-42c5-42c4-9964-8e25cf12d04c" />
-
-## 微信群
-![输入图片说明](https://foruda.gitee.com/images/1773302512337798592/4d72288b_77493.png "屏幕截图")
 
 ## Hosted deployment
 
 A hosted deployment is available on [Fronteir AI](https://fronteir.ai/mcp/weibaohui-k8m).
+
+## 联系我 飞书群
+
+![飞书群](https://foruda.gitee.com/images/1774879913229991117/07b7078d_77493.png "屏幕截图")
 
