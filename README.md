@@ -245,3 +245,8 @@ pnpm run dev
 
 ## 微信群
 ![输入图片说明](https://foruda.gitee.com/images/1773302512337798592/4d72288b_77493.png "屏幕截图")
+
+## Hosted deployment
+
+A hosted deployment is available on [Fronteir AI](https://fronteir.ai/mcp/weibaohui-k8m).
+
