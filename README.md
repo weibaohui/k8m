@@ -38,11 +38,10 @@
 Qwen2.5-Coder-7B，支持deepseek-ai/DeepSeek-R1-Distill-Qwen-7B模型
 模型交互能力，同时支持接入您自己的私有化大模型（包括ollama）。
 
-### 演示DEMO
 
-[DEMO](http://107.150.119.151:3618)
-[DEMO-InCluster模式](http://107.150.119.151:31999)
-用户名密码 demo/demo
+#快速体验
+如果你想通过在线环境快速拉起体验，可以访问：[k8m](https://cnb.cool/znb/qifei/-/tree/main/letsfly/justforfun/k8m)
+
 
 ### 文档
 
