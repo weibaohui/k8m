@@ -40,7 +40,17 @@ Qwen2.5-Coder-7B，支持deepseek-ai/DeepSeek-R1-Distill-Qwen-7B模型
 
 
 #快速体验
-如果你想通过在线环境快速拉起体验，可以访问：[k8m](https://cnb.cool/znb/qifei/-/tree/main/letsfly/justforfun/k8m)
+本项目提供cnb 在线访问地址 [k8m](https://cnb.cool/znb/qifei/-/tree/main/letsfly/justforfun/k8m)
+1. fork 这个项目后，
+2. 点击 仓库右上角 🛫起飞 按钮，
+3. 选择云IDE，
+4. 进入终端
+5. 输入`cd letsfly/justforfun/k8m  && docker-compose up `
+6. 进入端口 （在终端 tab页面右边）
+7. 新建端口转发，填入8888，确定
+8. 点击生成的转发地址，打开k8m 登录页面
+9. 输入用户名密码：k8m  k8m 。
+10. 🛫
 
 
 ### 文档
