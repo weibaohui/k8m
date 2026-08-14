@@ -47,7 +47,7 @@ jobs:
       - name: 编译前端
         run: |
           cd ui
-          pnpm install --dangerously-allow-all-builds
+          pnpm install --ignore-scripts
           pnpm build
 
       - name: 设置go环境
