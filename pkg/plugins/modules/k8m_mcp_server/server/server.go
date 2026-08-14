@@ -183,5 +183,8 @@ func GetMcpSSEServer() *server.SSEServer {
 	sc := createServerConfig("/mcp/k8m")
 	serv := mcp.GetMCPServerWithOption(sc)
 	serv.AddTool(SaveYamlTemplateTool(), SaveYamlTemplateToolHandler)
+	// 覆盖上游 kom 库 mcp/tools/pod 中有 bug 的 run_command_in_k8s_pod（issue #468）：
+	// 上游 handler 使用 string 作为 dest 触发 kom/callbacks/exec.go 的反射校验失败。
+	serv.AddTool(ExecToolOverride(), ExecHandlerOverride)
 	return mcp.GetMCPSSEServerWithServerAndOption(serv, sc)
 }
