@@ -35,6 +35,7 @@
     "js-yaml": "^4.1.0",
     "jszip": "^3.10.1",
     "jwt-decode": "^4.0.0",
+    "mobx-react-lite": "^5.0.0",
     "monaco-editor": "^0.52.2",
     "react": "^18.3.1",
     "react-countup": "^6.5.3",
@@ -59,5 +60,12 @@
     "typescript": "^5.8.3",
     "vite": "^6.3.6",
     "vite-plugin-monaco-editor": "^1.1.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@parcel/watcher",
+      "canvas",
+      "esbuild"
+    ]
   }
 }
