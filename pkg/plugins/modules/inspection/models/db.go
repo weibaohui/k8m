@@ -6,6 +6,23 @@ import (
 	"k8s.io/klog/v2"
 )
 
+// DedupeBuiltinLuaScripts 按 Name 去重，保留首次出现的条目。
+// 用于防御内置脚本源数据中偶然出现重名条目，避免触发 UNIQUE 约束导致插件安装/重载失败。
+// 返回新切片，不修改入参。
+func DedupeBuiltinLuaScripts(in []InspectionLuaScript) []InspectionLuaScript {
+	seen := make(map[string]struct{}, len(in))
+	out := make([]InspectionLuaScript, 0, len(in))
+	for _, s := range in {
+		if _, ok := seen[s.Name]; ok {
+			klog.V(6).Infof("跳过重名的内置巡检脚本: name=%q script_code=%q", s.Name, s.ScriptCode)
+			continue
+		}
+		seen[s.Name] = struct{}{}
+		out = append(out, s)
+	}
+	return out
+}
+
 // InitDB 初始化集群巡检相关数据库表（GORM 自动迁移），并写入内置脚本。
 func InitDB() error {
 	if err := dao.DB().AutoMigrate(
@@ -99,8 +116,9 @@ func AddBuiltinLuaScripts() error {
 		klog.Errorf("删除旧内置巡检脚本失败: %v", err)
 		return err
 	}
-	// 插入最新内置脚本
-	if err := db.CreateInBatches(BuiltinLuaScripts, 100).Error; err != nil {
+	// 插入最新内置脚本（先按 Name 去重，防御源数据中出现重复条目）
+	scripts := DedupeBuiltinLuaScripts(BuiltinLuaScripts)
+	if err := db.CreateInBatches(scripts, 100).Error; err != nil {
 		klog.Errorf("插入内置巡检脚本失败: %v", err)
 		return err
 	}

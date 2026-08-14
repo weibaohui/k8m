@@ -120,7 +120,9 @@ func (s *AdminLuaScriptController) LuaScriptLoad(c *response.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
-	err = dao.DB().Model(&models.InspectionLuaScript{}).CreateInBatches(models.BuiltinLuaScripts, 100).Error
+	// 先按 Name 去重，防御源数据中重名条目触发 UNIQUE 约束
+	scripts := models.DedupeBuiltinLuaScripts(models.BuiltinLuaScripts)
+	err = dao.DB().Model(&models.InspectionLuaScript{}).CreateInBatches(scripts, 100).Error
 	if err != nil {
 		klog.Errorf("插入内置巡检脚本失败: %v", err)
 		amis.WriteJsonError(c, err)
