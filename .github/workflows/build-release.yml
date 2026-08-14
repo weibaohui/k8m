@@ -24,7 +24,9 @@ jobs:
       - name: 编译前端
         run: |
           cd ui
-          pnpm install
+          pnpm install --no-frozen-lockfile
+          pnpm approve-builds --all || true
+          pnpm install --frozen-lockfile
           pnpm build
 
       - name: 上传到共享

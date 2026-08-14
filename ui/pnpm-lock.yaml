@@ -95,6 +95,9 @@ importers:
       jwt-decode:
         specifier: ^4.0.0
         version: 4.0.0
+      mobx-react-lite:
+        specifier: ^5.0.0
+        version: 5.0.0(mobx@4.15.7)(react@18.3.1)
       monaco-editor:
         specifier: ^0.52.2
         version: 0.52.2
@@ -1951,6 +1954,12 @@ packages:
       react-native:
         optional: true
 
+  mobx-react-lite@5.0.0:
+    resolution: {integrity: sha512-+Kg+KhOQx/ggkFuHViUJvsOsgmAFvBUHfGb/cimNX5Csb1MfMYjbp5CcUu6kw2zr11HwB1gaD7FnqdAcCryvhg==}
+    peerDependencies:
+      mobx: ^7.0.0
+      react: ^18 || ^19
+
   mobx-react@6.3.1:
     resolution: {integrity: sha512-IOxdJGnRSNSJrL2uGpWO5w9JH5q5HoxEqwOF4gye1gmZYdjoYkkMzSGMDnRCUpN/BNzZcFoMdHXrjvkwO7KgaQ==}
     peerDependencies:
@@ -2817,7 +2826,7 @@ packages:
     resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
 
   webworkify-webpack@https://codeload.github.com/xqq/webworkify-webpack/tar.gz/24d1e719b4a6cac37a518b2bb10fe124527ef4ef:
-    resolution: {tarball: https://codeload.github.com/xqq/webworkify-webpack/tar.gz/24d1e719b4a6cac37a518b2bb10fe124527ef4ef}
+    resolution: {gitHosted: true, integrity: sha512-DPqNW8CSRNB+5wfoia6e63A04AuOnkFPsBZMtEB2TMbQbBDcmrsBgwmppiCZZlvl1ve9i2p6f9ivCMtkz8q87A==, tarball: https://codeload.github.com/xqq/webworkify-webpack/tar.gz/24d1e719b4a6cac37a518b2bb10fe124527ef4ef}
     version: 2.1.5
 
   whatwg-url@5.0.0:
@@ -4805,6 +4814,11 @@ snapshots:
       react: 18.3.1
     optionalDependencies:
       react-dom: 18.3.1(react@18.3.1)
+
+  mobx-react-lite@5.0.0(mobx@4.15.7)(react@18.3.1):
+    dependencies:
+      mobx: 4.15.7
+      react: 18.3.1
 
   mobx-react@6.3.1(mobx@4.15.7)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
