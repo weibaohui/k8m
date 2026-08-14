@@ -116,6 +116,14 @@ jobs:
           cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_REPONAME }}:buildcache
           cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_REPONAME }}:buildcache,mode=max
           platforms: linux/amd64,linux/arm64
+          # Disable SLSA provenance attestation: the OCI 1.1 empty
+          # descriptor it emits is rejected by registry.cn-hangzhou
+          # (Aliyun personal registry). DockerHub and ghcr.io accept
+          # it, but a single registry failure aborts the whole
+          # multi-destination push. Setting `provenance: false` keeps
+          # all three registries in sync at the cost of supply-chain
+          # attestation.
+          provenance: false
           # 给清单打上多个标签
           tags: |
             ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_REPONAME }}:latest
