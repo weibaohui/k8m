@@ -251,9 +251,9 @@ export default defineConfig(({ mode }) => {
         },
         {
             name: 'copy-monaco-loader',
-            closeBundle() {
+            async closeBundle() {
                 // monaco-editor >= 0.56 将 min/vs 全量平铺（含预构建 worker 与分片 chunk），整目录拷贝
-                copy('node_modules/monaco-editor/min/vs', 'dist/monacoeditorwork', { overwrite: true })
+                await copy('node_modules/monaco-editor/min/vs', 'dist/monacoeditorwork', { overwrite: true })
             }
         },
         // 构建结束时复制插件前端到 dist
