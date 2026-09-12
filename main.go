@@ -54,7 +54,8 @@ import (
 	"k8s.io/klog/v2"
 )
 
-//go:embed ui/dist/*
+// all: 前缀包含 _ 和 . 开头的文件（vite 8/rolldown 的共享 chunk 以 _ 开头，默认 embed 会排除）
+//go:embed all:ui/dist
 var embeddedFiles embed.FS
 var Version string
 var GitCommit string
