@@ -308,7 +308,7 @@ const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>
                             onCancel={() => {
                                 setLoading(false);
                             }}
-                            footer={(_, info) => {
+                            suffix={(_, info) => {
                                 const { SendButton, ClearButton } = info.components;
 
                                 return (
