@@ -91,7 +91,7 @@ func createServerConfig(basePath string) *mcp.ServerConfig {
 		}
 	}
 
-	var actFn = func(ctx context.Context, id any, request *mcp2.CallToolRequest, result *mcp2.CallToolResult) {
+	var actFn = func(ctx context.Context, id any, request *mcp2.CallToolRequest, result any) {
 		klog.V(8).Infof("CallToolRequest: %v", utils.ToJSON(request))
 		host := service.McpService().Host()
 		toolName := request.Params.Name
@@ -100,7 +100,7 @@ func createServerConfig(basePath string) *mcp.ServerConfig {
 		var resultStr string
 		var errStr string
 		resultStr = utils.ToJSON(result)
-		if result.IsError {
+		if res, ok := result.(*mcp2.CallToolResult); ok && res.IsError {
 			errStr = resultStr
 		}
 

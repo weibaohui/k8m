@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { render as amisRender } from "amis";
 import { formatFinalGetUrl } from "@/utils/utils";
-import { Button, Flex, Space, Typography } from "antd";
+import { Avatar, Button, Flex, Space, Typography } from "antd";
 import {
     BulbOutlined,
     InfoCircleOutlined,
@@ -135,10 +135,10 @@ const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>
         useEffect(() => {
             scrollToBottom();
         }, [messages]);
-        const renderMarkdown: BubbleProps['messageRender'] = (content: string) => {
+        const renderMarkdown: BubbleProps['contentRender'] = (content) => {
             return amisRender({
                 type: "markdown",
-                value: content
+                value: content as string
             })
         };
         const items: PromptsProps['items'] = [
@@ -215,13 +215,15 @@ const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>
                                 <Bubble
                                     placement={msg.role === "user" ? "end" : "start"}
                                     content={msg.content}
-                                    avatar={{
-                                        icon: msg.role === "user"
-                                            ? <UserOutlined />
-                                            : <RocketOutlined />,
-                                        style: msg.role === "user" ? barAvatar : fooAvatar,
-                                    }}
-                                    messageRender={renderMarkdown}
+                                    avatar={
+                                        <Avatar
+                                            icon={msg.role === "user"
+                                                ? <UserOutlined />
+                                                : <RocketOutlined />}
+                                            style={msg.role === "user" ? barAvatar : fooAvatar}
+                                        />
+                                    }
+                                    contentRender={renderMarkdown}
                                     loading={msg.role === 'ai' && msg.content === 'thinking'}
                                 />
                             </>
@@ -306,7 +308,7 @@ const WebSocketChatGPT = React.forwardRef<HTMLDivElement, WebSocketChatGPTProps>
                             onCancel={() => {
                                 setLoading(false);
                             }}
-                            actions={(_, info) => {
+                            suffix={(_, info) => {
                                 const { SendButton, ClearButton } = info.components;
 
                                 return (

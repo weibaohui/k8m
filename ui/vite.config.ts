@@ -55,6 +55,11 @@ export default defineConfig(({ mode }) => {
 
     return {
         base: '/',
+        // vite 8 默认使用 lightningcss 压缩，对依赖包中的非标准 media query 直接报错；
+        // 回退为 esbuild 压缩（vite 6 行为）
+        build: {
+            cssMinify: 'esbuild',
+        },
         server: {
             port: 3000,
             open: true,
@@ -246,12 +251,9 @@ export default defineConfig(({ mode }) => {
         },
         {
             name: 'copy-monaco-loader',
-            closeBundle() {
-                copy('node_modules/monaco-editor/min/vs/loader.js', 'dist/monacoeditorwork/loader.js', { overwrite: true })
-                copy('node_modules/monaco-editor/min/vs/editor', 'dist/monacoeditorwork/editor', { overwrite: true })
-                copy('node_modules/monaco-editor/min/vs/language', 'dist/monacoeditorwork/language', { overwrite: true })
-                copy('node_modules/monaco-editor/min/vs/base', 'dist/monacoeditorwork/base', { overwrite: true })
-                copy('node_modules/monaco-editor/min/vs/basic-languages', 'dist/monacoeditorwork/basic-languages', { overwrite: true })
+            async closeBundle() {
+                // monaco-editor >= 0.56 将 min/vs 全量平铺（含预构建 worker 与分片 chunk），整目录拷贝
+                await copy('node_modules/monaco-editor/min/vs', 'dist/monacoeditorwork', { overwrite: true })
             }
         },
         // 构建结束时复制插件前端到 dist
