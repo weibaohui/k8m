@@ -13,6 +13,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
 	"gorm.io/gorm"
+	"k8s.io/klog/v2"
 )
 
 type AdminUserController struct {
@@ -113,6 +114,10 @@ func (a *AdminUserController) Delete(c *response.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
+	// 撤销被删用户的全部会话（按用户ID集合，用户记录已删除）
+	if err := service.TokenService().RevokeAllByUserByIDs(utils.ToInt64Slice(ids)); err != nil {
+		klog.Errorf("撤销被删除用户的会话失败: %v", err)
+	}
 	// 清除用户的缓存
 	service.UserService().ClearCacheByKey(m.Username)
 	amis.WriteJsonOK(c)
@@ -161,6 +166,10 @@ func (a *AdminUserController) UpdatePsw(c *response.Context) {
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
+	}
+	// 密码已变更，撤销该用户全部旧会话，防止已签发凭证继续使用
+	if err := service.TokenService().RevokeAllByUserByIDs([]int64{int64(m.ID)}); err != nil {
+		klog.Errorf("撤销用户旧会话失败: %v", err)
 	}
 	amis.WriteJsonOK(c)
 }
@@ -277,6 +286,12 @@ func (a *AdminUserController) UserStatusQuickSave(c *response.Context) {
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
+	}
+	// 禁用时撤销该用户全部会话，立即生效
+	if entity.Disabled {
+		if err := service.TokenService().RevokeAllByUserByIDs([]int64{int64(entity.ID)}); err != nil {
+			klog.Errorf("撤销用户会话失败: %v", err)
+		}
 	}
 	amis.WriteJsonErrorOrOK(c, err)
 }

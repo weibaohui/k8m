@@ -53,6 +53,48 @@ func FromRequest(r *http.Request) *Context {
 	return New(nil, r)
 }
 
+// ClientIP 返回客户端 IP。优先 X-Forwarded-For 与 X-Real-IP 头（经反向代理部署时），
+// 否则取连接对端地址。用于会话签发时的来源记录。
+func (c *Context) ClientIP() string {
+	if c.Request == nil {
+		return ""
+	}
+	if fwd := c.Request.Header.Get("X-Forwarded-For"); fwd != "" {
+		if idx := indexByte(fwd, ','); idx > 0 {
+			return trimSpace(fwd[:idx])
+		}
+		return trimSpace(fwd)
+	}
+	if rip := c.Request.Header.Get("X-Real-IP"); rip != "" {
+		return trimSpace(rip)
+	}
+	host := c.Request.RemoteAddr
+	if idx := indexByte(host, ':'); idx > 0 {
+		return host[:idx]
+	}
+	return host
+}
+
+func indexByte(s string, b byte) int {
+	for i := 0; i < len(s); i++ {
+		if s[i] == b {
+			return i
+		}
+	}
+	return -1
+}
+
+func trimSpace(s string) string {
+	start, end := 0, len(s)
+	for start < end && (s[start] == ' ' || s[start] == '\t') {
+		start++
+	}
+	for end > start && (s[end-1] == ' ' || s[end-1] == '\t') {
+		end--
+	}
+	return s[start:end]
+}
+
 func (c *Context) JSON(status int, obj interface{}) {
 	c.Writer.Header().Set("Content-Type", "application/json; charset=utf-8")
 	c.Writer.WriteHeader(status)

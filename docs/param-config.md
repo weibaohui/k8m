@@ -80,7 +80,7 @@ flowchart TD
 | 配置项      | 命令行参数                 | 环境变量                | 默认值               | 描述                 |
 |----------|-----------------------|---------------------|-------------------|--------------------|
 | 登录方式     | `--login-type`        | `LOGIN_TYPE`        | `password`        | 支持密码、OAuth、Token登录 |
-| JWT密钥    | `--jwt-token-secret`  | `JWT_TOKEN_SECRET`  | `your-secret-key` | JWT签名密钥            |
+| JWT密钥    | `--jwt-token-secret`  | `JWT_TOKEN_SECRET`  | -（已废弃） | 已废弃：登录凭证改为服务端会话，无需配置 |
 | 临时管理员启用  | `--enable-temp-admin` | `ENABLE_TEMP_ADMIN` | `false`           | 是否启用临时管理员账户        |
 | 临时管理员用户名 | `--admin-username`    | `ADMIN_USERNAME`    |                   | 临时管理员用户名           |
 | 临时管理员密码  | `--admin-password`    | `ADMIN_PASSWORD`    |                   | 临时管理员密码            |

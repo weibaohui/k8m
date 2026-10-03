@@ -12,7 +12,6 @@ import (
 	"github.com/go-ldap/ldap/v3"
 	"k8s.io/klog/v2"
 
-	"github.com/golang-jwt/jwt/v4"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
 	"github.com/weibaohui/k8m/pkg/constants"
@@ -229,21 +228,11 @@ func (u *userService) GetClusters(username string) ([]*models.ClusterUserRole, e
 	return result, err
 }
 
-// GenerateJWTTokenOnlyUserName  生成 Token，仅包含Username
-func (u *userService) GenerateJWTTokenOnlyUserName(username string, duration time.Duration) (string, error) {
-	if username == "" {
-		return "", errors.New("username cannot be empty")
-	}
-	name := constants.JwtUserName
-
-	var token = jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		name:              username,
-		"isPlatformAdmin": u.IsUserPlatformAdmin(username), //前端展示平台管理员使用，没有其他用处
-		"exp":             time.Now().Add(duration).Unix(),
-	})
-	cfg := flag.Init()
-	var jwtSecret = []byte(cfg.JwtTokenSecret)
-	return token.SignedString(jwtSecret)
+// GenerateUserToken 为用户签发登录凭证（Opaque Token，服务端会话）。
+// duration 为会话有效期；sourceType 记录签发来源（password/ldap/sso/temp_admin/mcp_key/api_key/mcp_host）。
+// 取代原 GenerateJWTTokenOnlyUserName：不再使用 JWT 签名，改为随机凭证+服务端会话（issue #482 修复）。
+func (u *userService) GenerateUserToken(username string, duration time.Duration, sourceType, ip string) (string, error) {
+	return TokenService().Issue(username, sourceType, ip, duration)
 }
 
 // GetGroupNames 获取用户所在的用户组

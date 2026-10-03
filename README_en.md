@@ -146,7 +146,7 @@ Usage of ./k8m:
       --connect-cluster                  Whether to automatically connect to existing clusters when starting, disabled by default
   -d, --debug                            Debug mode
       --in-cluster                       Whether to automatically register and manage the host cluster, enabled by default
-      --jwt-token-secret string          Secret used for generating JWT token after login (default "your-secret-key")
+      --jwt-token-secret string          Deprecated, no effect (login credentials now use server-side sessions)
   -c, --kubeconfig string                Path to kubeconfig file (default "/root/.kube/config")
       --kubectl-shell-image string       Kubectl Shell image. Default is bitnami/kubectl:latest, must contain kubectl command (default "bitnami/kubectl:latest")
       --log-v int                        Log level for klog.klog.V(2) (default 2)
@@ -218,7 +218,7 @@ k8m supports flexible configuration through environment variables and command li
 | `ADMIN_PASSWORD`           |                          | Administrator password, takes effect after enabling temporary admin account configuration    |
 | `DEBUG`                    | `"false"`                  | Whether to enable `debug` mode                                                                |
 | `LOG_V`                    | `"2"`                    | Log output level, same usage as klog                                                          |
-| `JWT_TOKEN_SECRET`         | `"your-secret-key"`        | Secret used for JWT Token generation                                                          |
+| `JWT_TOKEN_SECRET`         | -                          | Deprecated, no effect (server-side sessions replace JWT)                                      |
 | `KUBECTL_SHELL_IMAGE`      | `bitnami/kubectl:latest`   | kubectl shell image address                                                                   |
 | `NODE_SHELL_IMAGE`         | `alpine:latest`            | Node shell image address                                                                      |
 | `IMAGE_PULL_TIMEOUT`       | `"30"`                     | Node shell, kubectl shell image pull timeout (seconds)                                       |

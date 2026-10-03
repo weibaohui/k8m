@@ -1,6 +1,7 @@
 package admin
 
 import (
+	"errors"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -12,6 +13,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
 	"gorm.io/gorm"
+	"k8s.io/klog/v2"
 )
 
 type KeyController struct{}
@@ -43,10 +45,11 @@ func (mc *KeyController) Create(c *response.Context) {
 		return
 	}
 
-	// 从JWT中获取用户信息
+	// 从会话中获取用户信息
 	username := c.GetString(constants.JwtUserName)
 
-	jwt, err := service.UserService().GenerateJWTTokenOnlyUserName(username, time.Hour*24*365*10)
+	// 生成会话凭证（Opaque Token，10年有效期，服务端可撤销）
+	token, err := service.UserService().GenerateUserToken(username, time.Hour*24*365*10, "mcp_key", c.ClientIP())
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
@@ -56,7 +59,7 @@ func (mc *KeyController) Create(c *response.Context) {
 	mcpKey := &models.McpKey{
 		Username:    username,
 		McpKey:      utils.RandNLengthString(8),
-		Jwt:         jwt,
+		Jwt:         token,
 		Description: req.Description,
 		LastUsedAt:  time.Now(),
 	}
@@ -105,10 +108,25 @@ func (mc *KeyController) Delete(c *response.Context) {
 
 	mcpKey := &models.McpKey{}
 
-	err := mcpKey.Delete(params, id)
+	// 先取出待删密钥：密钥凭证即会话 token，删除记录后必须撤销对应会话才能立即失效。
+	existing, err := mcpKey.GetOne(params, func(db *gorm.DB) *gorm.DB {
+		return db.Where("id = ?", id)
+	})
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	err = mcpKey.Delete(params, id)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
+	}
+
+	if existing != nil && existing.Jwt != "" {
+		if err := service.TokenService().Revoke(existing.Jwt); err != nil {
+			klog.Errorf("撤销MCP密钥会话失败: %v", err)
+		}
 	}
 	amis.WriteJsonOK(c)
 }

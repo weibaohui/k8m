@@ -87,7 +87,12 @@ func (lc *Controller) LoginByPassword(c *response.Context) {
 			return
 		}
 		// Admin用户不需要2FA验证
-		token, _ := service.UserService().GenerateJWTTokenOnlyUserName(req.Username, time.Hour*24)
+		token, err := service.UserService().GenerateUserToken(req.Username, time.Hour*24, "temp_admin", c.ClientIP())
+		if err != nil {
+			klog.Errorf("签发会话失败: %v", err)
+			c.JSON(http.StatusUnauthorized, errorInfo)
+			return
+		}
 		c.JSON(http.StatusOK, response.H{"token": token})
 		return
 	} else {
@@ -141,7 +146,12 @@ func (lc *Controller) LoginByPassword(c *response.Context) {
 					}
 				}
 
-				token, _ := service.UserService().GenerateJWTTokenOnlyUserName(v.Username, 24*time.Hour)
+				token, err := service.UserService().GenerateUserToken(v.Username, 24*time.Hour, "password", c.ClientIP())
+				if err != nil {
+					klog.Errorf("签发会话失败: %v", err)
+					c.JSON(http.StatusUnauthorized, errorInfo)
+					return
+				}
 				c.JSON(http.StatusOK, response.H{"token": token})
 				return
 			}
@@ -214,7 +224,12 @@ func handleLDAPLogin(c *response.Context, username, password, code string, cfg *
 	}
 
 	// 5. 生成token
-	token, _ := service.UserService().GenerateJWTTokenOnlyUserName(username, 24*time.Hour)
+	token, err := service.UserService().GenerateUserToken(username, 24*time.Hour, "ldap", c.ClientIP())
+	if err != nil {
+		klog.Errorf("签发会话失败: %v", err)
+		c.JSON(http.StatusInternalServerError, response.H{"message": "系统错误"})
+		return err
+	}
 	c.JSON(http.StatusOK, response.H{"token": token})
 	return nil
 }

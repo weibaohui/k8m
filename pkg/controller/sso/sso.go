@@ -104,7 +104,7 @@ func (au *AuthController) HandleCallback(c *response.Context) {
 	username := GetUsername(claims, strings.Split(client.DBConfig.PreferUserNameKeys, ","))
 	groups := GetUserGroups(claims)
 	_ = service.UserService().CheckAndCreateUser(username, name, groups)
-	userLoginToken, err := service.UserService().GenerateJWTTokenOnlyUserName(username, 24*time.Hour)
+	userLoginToken, err := service.UserService().GenerateUserToken(username, 24*time.Hour, "sso", c.ClientIP())
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return

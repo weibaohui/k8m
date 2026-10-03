@@ -15,6 +15,7 @@ import (
 	"github.com/weibaohui/k8m/pkg/models"
 	mcpModels "github.com/weibaohui/k8m/pkg/plugins/modules/mcp_runtime/models"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/mcp_runtime/service"
+	k8mservice "github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/kom/mcp"
 	"github.com/weibaohui/kom/mcp/tools"
@@ -37,10 +38,10 @@ func extractKey(path string) string {
 	return ""
 }
 
-// createServerConfig 返回一个配置了 JWT 用户名提取、工具调用日志钩子及相关服务器和 SSE 选项的 MCP 服务器配置。
-// 支持两种传递认证的方式，一是将mcpKey作为路径参数传递，二是将JWT token作为Authorization头部传递。
+// createServerConfig 返回一个配置了会话凭证用户名提取、工具调用日志钩子及相关服务器和 SSE 选项的 MCP 服务器配置。
+// 支持两种传递认证的方式，一是将mcpKey作为路径参数传递，二是将会话token作为Authorization头部传递。
 // mcpKey 与用户的信息绑定，mcpKey代表了一个用户
-// token 与用户的JWT token绑定，代表了用户的权限，这个token与前端页面使用的jwt token 一致。
+// token 与用户的会话绑定，代表了用户的权限，这个token与前端页面使用的token一致（Opaque Token，服务端会话）。
 func createServerConfig(basePath string) *mcp.ServerConfig {
 	cfg := flag.Init()
 
@@ -65,7 +66,7 @@ func createServerConfig(basePath string) *mcp.ServerConfig {
 			auth = after
 		}
 		klog.V(6).Infof("Authorization: %v", auth)
-		if username, err := utils.GetUsernameFromToken(auth, cfg.JwtTokenSecret); err == nil {
+		if username, err := k8mservice.TokenService().Validate(strings.TrimSpace(auth)); err == nil {
 			klog.V(6).Infof("Extracted username from token: %v", username)
 			newCtx = context.WithValue(newCtx, constants.JwtUserName, username)
 		} else {

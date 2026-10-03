@@ -3,33 +3,29 @@ import { useNavigate } from 'react-router-dom';
 import styles from './index.module.scss';
 import { UserOutlined, GlobalOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
-import { jwtDecode } from 'jwt-decode';
-
-interface DecodedToken {
-    username: string;
-    isPlatformAdmin: boolean;
-    // JWT标准字段
-    exp: number;
-    iat: number;
-}
+import { fetcher } from '@/components/Amis/fetcher';
 
 const Toolbar = () => {
     const navigate = useNavigate();
     const [userInfo, setUserInfo] = useState<{ username: string; role: string }>({ username: '', role: '' });
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        if (token) {
+        // 登录凭证为 Opaque Token（不含用户信息），用户名与角色从后端接口获取
+        const fetchUserInfo = async () => {
             try {
-                const decoded = jwtDecode<DecodedToken>(token);
+                const response = await fetcher({ url: '/params/user/role', method: 'get' });
+                const data = response.data?.data as { roles?: string[]; username?: string } | undefined;
+                const roles: string[] = Array.isArray(data?.roles) ? data.roles : [];
+                const isAdmin = roles.includes('platform_admin');
                 setUserInfo({
-                    username: decoded.username || '',
-                    role: decoded.isPlatformAdmin ? '平台管理员' : '普通用户'
+                    username: data?.username || '',
+                    role: isAdmin ? '平台管理员' : '普通用户'
                 });
             } catch (error) {
-                console.error('Failed to decode token:', error);
+                console.error('Failed to fetch user info:', error);
             }
-        }
+        };
+        fetchUserInfo();
     }, []);
 
     const handleLogout = () => {

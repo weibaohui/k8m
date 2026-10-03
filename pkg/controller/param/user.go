@@ -23,6 +23,7 @@ func (pc *Controller) UserRole(c *response.Context) {
 			"cluster":   "",
 			"groups":    []string{},
 			"menu_data": []any{},
+			"username":  user,
 		})
 		return
 	}
@@ -52,5 +53,6 @@ func (pc *Controller) UserRole(c *response.Context) {
 		"cluster":   cluster,
 		"groups":    groupNames,
 		"menu_data": menuData,
+		"username":  user,
 	})
 }

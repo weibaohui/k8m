@@ -148,8 +148,9 @@ func (c *Config) InitFlags() {
 
 	defaultInCluster := getEnvAsBool("IN_CLUSTER", true)
 
-	// jwt token secret
-	defaultJwtTokenSecret := getEnv("JWT_TOKEN_SECRET", "your-secret-key")
+	// jwt token secret（已废弃：登录凭证改为服务端会话 Opaque Token，不再使用 JWT 签名）
+	// 参数保留仅为兼容存量部署脚本/manifest，设置与否均不影响运行。
+	defaultJwtTokenSecret := getEnv("JWT_TOKEN_SECRET", "")
 
 	// nodeShell 镜像
 	defaultNodeShellImage := getEnv("NODE_SHELL_IMAGE", "alpine:latest")
@@ -211,7 +212,7 @@ func (c *Config) InitFlags() {
 	pflag.StringVar(&c.ProductName, "product-name", defaultProductName, "产品名称，默认为K8M")
 
 	pflag.StringVar(&c.LoginType, "login-type", defaultLoginType, "登录方式，password, oauth, token等,default is password")
-	pflag.StringVar(&c.JwtTokenSecret, "jwt-token-secret", defaultJwtTokenSecret, "登录后生成JWT token 使用的Secret")
+	pflag.StringVar(&c.JwtTokenSecret, "jwt-token-secret", defaultJwtTokenSecret, "已废弃，无实际作用（登录凭证已改为服务端会话），参数保留仅为兼容存量部署")
 
 	// 临时管理员账户配置
 	pflag.BoolVar(&c.EnableTempAdmin, "enable-temp-admin", defaultEnableTempAdmin, "是否启用临时管理员账户配置，默认关闭")
@@ -273,6 +274,11 @@ func (c *Config) InitFlags() {
 	// SQLite 配置优先级警告
 	if c.SqliteDSN != "" && c.SqlitePath != "" {
 		klog.Warning("检测到同时设置了 --sqlite-dsn 与 --sqlite-path，将优先使用 --sqlite-dsn")
+	}
+
+	// JWT 弃用警告：凭证机制已改为服务端会话（Opaque Token），该参数不再生效
+	if c.JwtTokenSecret != "" {
+		klog.Warning("--jwt-token-secret / JWT_TOKEN_SECRET 已废弃且不再生效。k8m 登录凭证已改为服务端会话（Opaque Token），无需配置任何密钥（issue #482）")
 	}
 }
 

@@ -115,7 +115,7 @@ Usage of ./k8m:
       --connect-cluster                  启动集群是是否自动连接现有集群，默认关闭
   -d, --debug                            调试模式
       --in-cluster                       是否自动注册纳管宿主集群，默认启用
-      --jwt-token-secret string          登录后生成JWT token 使用的Secret (default "your-secret-key")
+      --jwt-token-secret string          已废弃，无实际作用（登录凭证已改为服务端会话）
   -c, --kubeconfig string                kubeconfig文件路径 (default "/root/.kube/config")
       --kubectl-shell-image string       Kubectl Shell 镜像。默认为 bitnami/kubectl:latest，必须包含kubectl命令 (default "bitnami/kubectl:latest")
       --log-v int                        klog的日志级别klog.V(2) (default 2)

@@ -152,5 +152,10 @@ func (uc *Controller) UpdatePsw(c *response.Context) {
 		amis.WriteJsonError(c, err)
 		return
 	}
+	// 密码已变更，撤销该用户全部旧会话（含当前会话，需重新登录）
+	if err := service.TokenService().RevokeAllByUser(m.Username); err != nil {
+		amis.WriteJsonError(c, err)
+		return
+	}
 	amis.WriteJsonOK(c)
 }

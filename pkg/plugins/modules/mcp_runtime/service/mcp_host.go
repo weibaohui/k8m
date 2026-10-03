@@ -14,7 +14,7 @@ import (
 	"github.com/sashabaranov/go-openai"
 	"github.com/weibaohui/k8m/internal/dao"
 	"github.com/weibaohui/k8m/pkg/comm/utils"
-	"github.com/weibaohui/k8m/pkg/comm/utils/amis"
+	"github.com/weibaohui/k8m/pkg/service"
 	"github.com/weibaohui/k8m/pkg/constants"
 	"github.com/weibaohui/k8m/pkg/plugins/modules/mcp_runtime/models"
 
@@ -165,13 +165,13 @@ func (m *MCPHost) GetClient(ctx context.Context, serverName string) (*client.Cli
 	}
 
 	username := m.getUserFromMCPCtx(ctx)
-	jwt, err := amis.GenerateJWTTokenOnlyUserNameInMCP(username, time.Hour*1)
+	token, err := service.UserService().GenerateUserToken(username, time.Hour*1, "mcp_host", "")
 	if err != nil {
-		return nil, fmt.Errorf("生成 JWT 令牌失败: %v", err)
+		return nil, fmt.Errorf("生成会话令牌失败: %v", err)
 	}
 	// 执行时携带用户名、角色信息
 	newCli, err := client.NewSSEMCPClient(config.URL, client.WithHeaders(map[string]string{
-		"Authorization": jwt,
+		"Authorization": token,
 	}))
 	if err != nil {
 		return nil, fmt.Errorf("创建新客户端 %s 失败: %v", serverName, err)

@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/fatih/color"
 	"github.com/go-chi/chi/v5"
@@ -85,6 +86,19 @@ func Init() {
 	// 打印版本和 Git commit 信息
 	klog.V(2).Infof("版本: %s\n", Version)
 	klog.V(2).Infof("Git Commit: %s\n", GitCommit)
+
+	// 启动会话过期清理定时任务（每天一次，清理已过期超过24小时的会话记录）
+	go func() {
+		ticker := time.NewTicker(24 * time.Hour)
+		defer ticker.Stop()
+		for range ticker.C {
+			if count, err := service.TokenService().CleanupExpired(); err != nil {
+				klog.Errorf("清理过期会话失败: %v", err)
+			} else if count > 0 {
+				klog.V(4).Infof("已清理%d条过期会话记录", count)
+			}
+		}
+	}()
 
 	// 初始化 AI 内置模型参数（通过统一接口）
 	aiService.AIService().SetVars(InnerApiKey, InnerApiUrl, InnerModel)

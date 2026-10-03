@@ -2,6 +2,8 @@ package utils
 
 import (
 	"crypto/rand"
+	"encoding/hex"
+	"fmt"
 	"math/big"
 )
 
@@ -71,6 +73,16 @@ func RandNLengthString(n int) string {
 		result[i] = charset[randomIndex.Int64()]
 	}
 	return string(result)
+}
+
+// GenerateSecureToken 生成密码学安全的随机凭证（256位熵，十六进制编码，带 k8m_ 前缀便于识别）。
+// 与 RandNLengthString 不同：本函数在任何错误下都返回 error 而不是弱回退值，用于会话凭证签发。
+func GenerateSecureToken() (string, error) {
+	buf := make([]byte, 32)
+	if _, err := rand.Read(buf); err != nil {
+		return "", fmt.Errorf("生成随机凭证失败: %w", err)
+	}
+	return "k8m_" + hex.EncodeToString(buf), nil
 }
 
 // intPow is a helper function to calculate power of 10

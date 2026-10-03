@@ -1,6 +1,7 @@
 package admin
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -66,10 +67,15 @@ func (ac *Controller) Create(c *response.Context) {
 		return
 	}
 
-	// 生成API密钥
+	// 生成API密钥（Opaque Token，服务端会话，可撤销）
+	token, err := service.UserService().GenerateUserToken(username, duration, "api_key", c.ClientIP())
+	if err != nil {
+		amis.WriteJsonError(c, fmt.Errorf("生成API密钥失败: %v", err))
+		return
+	}
 	apiKey := &models.ApiKey{
 		Username:    username,
-		Key:         generateAPIKey(username, duration),
+		Key:         token,
 		Description: req.Description,
 		ExpiresAt:   expiresAt,
 		CreatedBy:   username,
@@ -85,15 +91,6 @@ func (ac *Controller) Create(c *response.Context) {
 	}
 
 	amis.WriteJsonOK(c)
-}
-func generateAPIKey(username string, duration time.Duration) string {
-	// 查询用户对应的集群
-	token, err := service.UserService().GenerateJWTTokenOnlyUserName(username, duration)
-	if err != nil {
-		klog.Errorf("generateAPIKey error: %v", err)
-		return ""
-	}
-	return token
 }
 
 // List 获取API密钥列表
@@ -131,10 +128,26 @@ func (ac *Controller) Delete(c *response.Context) {
 
 	apiKey := &models.ApiKey{}
 
-	err := apiKey.Delete(params, id)
+	// 先取出待删密钥的值：密钥凭证本身就是会话 token，删除记录后必须撤销对应会话，
+	// 否则密钥仍可通过会话表校验继续使用（与"删除即失效"的语义不符）。
+	existing, err := apiKey.GetOne(params, func(db *gorm.DB) *gorm.DB {
+		return db.Where("id = ?", id)
+	})
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		amis.WriteJsonError(c, err)
+		return
+	}
+
+	err = apiKey.Delete(params, id)
 	if err != nil {
 		amis.WriteJsonError(c, err)
 		return
+	}
+
+	if existing != nil && existing.Key != "" {
+		if err := service.TokenService().Revoke(existing.Key); err != nil {
+			klog.Errorf("撤销API密钥会话失败: %v", err)
+		}
 	}
 	amis.WriteJsonOK(c)
 }

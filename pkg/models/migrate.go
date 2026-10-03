@@ -24,6 +24,8 @@ func init() {
 	_ = FixClusterAuthorizationTypeName()
 	_ = AddInnerAdminUserGroup()
 	_ = AddInnerAdminUser()
+	// 兼容迁移：把升级前签发的 API 密钥/MCP 密钥（旧版为 JWT 字符串）登记为服务端会话
+	AdoptLegacyKeysAsSessions()
 }
 func AutoMigrate() error {
 
@@ -37,6 +39,9 @@ func AutoMigrate() error {
 		errs = append(errs, err)
 	}
 	if err := dao.DB().AutoMigrate(&User{}); err != nil {
+		errs = append(errs, err)
+	}
+	if err := dao.DB().AutoMigrate(&UserSession{}); err != nil {
 		errs = append(errs, err)
 	}
 	if err := dao.DB().AutoMigrate(&ClusterUserRole{}); err != nil {
