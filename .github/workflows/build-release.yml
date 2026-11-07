@@ -3,7 +3,6 @@ name: build and push binary to release
 on:
   release:
     types: [ created, published ] # 表示在创建新的 Release 时触发
-env:
 jobs:
   build-release:
     runs-on: ubuntu-latest
