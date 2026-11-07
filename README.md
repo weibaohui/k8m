@@ -34,9 +34,7 @@
 
 
 **k8m** 是一款AI驱动的 Mini Kubernetes AI Dashboard 轻量级控制台工具，专为简化集群管理设计。它基于 AMIS 构建，并通过  [
-`kom`](https://github.com/weibaohui/kom)  作为 Kubernetes API 客户端，**k8m** 内置了
-Qwen2.5-Coder-7B，支持deepseek-ai/DeepSeek-R1-Distill-Qwen-7B模型
-模型交互能力，同时支持接入您自己的私有化大模型（包括ollama）。
+`kom`](https://github.com/weibaohui/kom)  作为 Kubernetes API 客户端，**k8m** 支持接入您自己的大模型（包括ollama等私有化部署）。AI功能需自行配置模型API Key后使用，不提供内置模型。
 
 
 # 快速体验
@@ -189,10 +187,12 @@ kubectl apply -f https://raw.githubusercontent.com/weibaohui/k8m/refs/heads/main
 
 ## **ChatGPT 配置指南**
 
-### 内置GPT
+k8m 不提供内置模型，使用AI功能前请先配置您自己的模型API Key：
 
-从v0.0.8版本开始，将内置GPT，无需配置。
-如果您需要使用自己的GPT，请参考以下文档。
+1. 在管理后台 `平台设置-AI模型配置` 中添加模型（填写API Key、API地址、模型名称）
+2. 在 `平台设置-AI运行配置` 中选择默认模型
+
+也可以参考以下文档：
 
 - [自托管/自定义大模型支持](docs/use-self-hosted-ai.md) - 如何使用自托管的
 - [Ollama配置](docs/ollama.md) - 如何配置使用Ollama大模型。

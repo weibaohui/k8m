@@ -11224,10 +11224,6 @@ var doc = `{
                 "updated_at": {
                     "description": "更新时间",
                     "type": "string"
-                },
-                "use_built_in_model": {
-                    "description": "是否使用内置模型",
-                    "type": "boolean"
                 }
             }
         },

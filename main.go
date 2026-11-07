@@ -47,7 +47,6 @@ import (
 	_ "github.com/weibaohui/k8m/pkg/models" // 注册模型
 	"github.com/weibaohui/k8m/pkg/plugins"
 	"github.com/weibaohui/k8m/pkg/plugins/modules"
-	aiService "github.com/weibaohui/k8m/pkg/plugins/modules/ai/service"
 	_ "github.com/weibaohui/k8m/pkg/plugins/modules/registrar" // 注册插件集中器
 	"github.com/weibaohui/k8m/pkg/response"
 	"github.com/weibaohui/k8m/pkg/service"
@@ -62,9 +61,6 @@ var Version string
 var GitCommit string
 var GitTag string
 var GitRepo string
-var InnerModel = "Qwen/Qwen2.5-7B-Instruct"
-var InnerApiKey string
-var InnerApiUrl string
 var BuildDate string
 
 // Init 完成服务的初始化，包括加载配置、设置版本信息、初始化 AI 服务、注册集群及其回调，并启动资源监控。
@@ -100,8 +96,6 @@ func Init() {
 		}
 	}()
 
-	// 初始化 AI 内置模型参数（通过统一接口）
-	aiService.AIService().SetVars(InnerApiKey, InnerApiUrl, InnerModel)
 	go func() {
 		// 初始化kom
 		// 先注册回调，后面集群连接后，需要执行回调

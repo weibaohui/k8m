@@ -9,7 +9,8 @@ K8M 支持使用自托管大模型，要求接口兼容OpenAI接口。
 1. 添加AI模型
    ![AI模型添加](/images/use-self-hosted-ai/ai_model_config.png)
 2. 配置AI模型
-   请首先关闭AI内置参数，然后选择自托管的AI接口
+   填写自托管AI接口的API Key、API地址和模型名称
    ![AI配置页面](/images/use-self-hosted-ai/ai-config.png)
    ![AI模型选择](/images/use-self-hosted-ai/ai-model-select.png)
+3. 在"AI运行配置"中选择默认模型后即可使用
     

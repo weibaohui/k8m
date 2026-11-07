@@ -32,7 +32,7 @@
 
 
 
-**k8m** is an AI-driven Mini Kubernetes AI Dashboard lightweight console tool designed to simplify cluster management. It is built on AMIS and uses [`kom`](https://github.com/weibaohui/kom) as the Kubernetes API client. **k8m** comes with built-in Qwen2.5-Coder-7B, supports deepseek-ai/DeepSeek-R1-Distill-Qwen-7B model interaction capabilities, and supports integration with your own private AI models (including ollama).
+**k8m** is an AI-driven Mini Kubernetes AI Dashboard lightweight console tool designed to simplify cluster management. It is built on AMIS and uses [`kom`](https://github.com/weibaohui/kom) as the Kubernetes API client. **k8m** supports integration with your own AI models (including ollama and other private deployments). No built-in model is provided — you must configure your own model API key before using AI features.
 
 ### Demo
 

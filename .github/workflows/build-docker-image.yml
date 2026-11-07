@@ -27,8 +27,6 @@ env:
   ALIHUB_USERNAME: weibh
   ALIHUB_IMAGE_REPONAME: minik8m
   IMAGE_REPONAME: k8m
-  OPENAI_API_MODEL: Qwen/Qwen2.5-7B-Instruct
-  OPENAI_API_URL: https://public.chatgpt.k8m.site/v1
 
 jobs:
   build-docker-image:
@@ -66,7 +64,7 @@ jobs:
 
       - name: 编译后端
         run: |
-          make build-linux GIT_COMMIT=${{ github.sha }} GIT_TAG=${{ github.ref_name }} GIT_REPOSITORY=${{ github.repository }} BUILD_DATE=${{ env.BUILD_TIME }} VERSION=${{ github.ref_name }} MODEL=${{ env.OPENAI_API_MODEL }} API_KEY=${{ secrets.OPENAI_API_KEY }} API_URL=${{ env.OPENAI_API_URL }}
+          make build-linux GIT_COMMIT=${{ github.sha }} GIT_TAG=${{ github.ref_name }} GIT_REPOSITORY=${{ github.repository }} BUILD_DATE=${{ env.BUILD_TIME }} VERSION=${{ github.ref_name }}
 
       - name: Inject slug/short variables
         uses: rlespinasse/github-slug-action@v4

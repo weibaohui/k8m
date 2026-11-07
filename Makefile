@@ -10,10 +10,6 @@ BUILD_TOOL ?= podman
 # 定义版本信息，默认值为 v1.0.0，可以通过命令行覆盖
 # 例如 make build-all VERSION=v0.0.1
 VERSION ?= v1.0.0
-API_KEY ?= "xyz"
-API_URL ?= "https://public.chatgpt.k8m.site/v1"
-MODEL ?= "Qwen/Qwen2.5-7B-Instruct"
-
 # 获取当前 Git commit 的简短哈希
 GIT_COMMIT ?= $(shell git rev-parse --short HEAD)
 GIT_TAG ?= "main" 
@@ -134,9 +130,6 @@ docker: ## 构建 Docker 镜像
            --build-arg GitTag=$(GIT_TAG) \
            --build-arg GitRepo=$(GIT_REPOSITORY) \
            --build-arg BuildDate=$(BUILD_DATE) \
-           --build-arg MODEL=$(MODEL) \
-     	   --build-arg API_KEY=$(API_KEY) \
-     	   --build-arg API_URL=$(API_URL) \
      	   --platform=linux/arm64,linux/amd64,linux/ppc64le,linux/s390x,linux/riscv64 \
      	   -t weibh/k8m:$(VERSION) -f Dockerfile . --load
 
@@ -146,7 +139,7 @@ build: ## 为当前平台构建可执行文件
 	@echo "构建当前平台可执行文件..."
 	@mkdir -p $(OUTPUT_DIR)
 	@GOOS=$(shell go env GOOS) GOARCH=$(shell go env GOARCH) \
-	    CGO_ENABLED=0 go build -ldflags "-s -w  -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT)  -X main.GitTag=$(GIT_TAG)  -X main.GitRepo=$(GIT_REPOSITORY)  -X main.BuildDate=$(BUILD_DATE) -X main.InnerModel=$(MODEL) -X main.InnerApiKey=$(API_KEY) -X main.InnerApiUrl=$(API_URL) " \
+	    CGO_ENABLED=0 go build -ldflags "-s -w  -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT)  -X main.GitTag=$(GIT_TAG)  -X main.GitRepo=$(GIT_REPOSITORY)  -X main.BuildDate=$(BUILD_DATE) " \
 	    -o "$(OUTPUT_DIR)/$(BINARY_NAME)" .
 
 # 为所有指定的平台和架构构建可执行文件
@@ -165,8 +158,8 @@ build-all: ## 为所有平台构建可执行文件
 		OUTPUT_FILE="$(OUTPUT_DIR)/$(BINARY_NAME)-$$GOOS-$$GOARCH$$EXT"; \
 		ZIP_FILE="$(OUTPUT_FILE).zip"; \
 		echo "输出文件: $$OUTPUT_FILE"; \
-		echo "执行命令: GOOS=$$GOOS GOARCH=$$GOARCH go build -ldflags \"-s -w -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT)  -X main.GitTag=$(GIT_TAG)  -X main.GitRepo=$(GIT_REPOSITORY)  -X main.BuildDate=$(BUILD_DATE) -X main.InnerModel=$(MODEL) -X main.InnerApiKey=$(API_KEY) -X main.InnerApiUrl=$(API_URL) \" -o $$OUTPUT_FILE ."; \
-		GOOS=$$GOOS GOARCH=$$GOARCH CGO_ENABLED=0 go build -ldflags "-s -w   -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT)  -X main.GitTag=$(GIT_TAG)  -X main.GitRepo=$(GIT_REPOSITORY)  -X main.BuildDate=$(BUILD_DATE) -X main.InnerModel=$(MODEL) -X main.InnerApiKey=$(API_KEY) -X main.InnerApiUrl=$(API_URL) " -o "$$OUTPUT_FILE" .; \
+		echo "执行命令: GOOS=$$GOOS GOARCH=$$GOARCH go build -ldflags \"-s -w -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT)  -X main.GitTag=$(GIT_TAG)  -X main.GitRepo=$(GIT_REPOSITORY)  -X main.BuildDate=$(BUILD_DATE) \" -o $$OUTPUT_FILE ."; \
+		GOOS=$$GOOS GOARCH=$$GOARCH CGO_ENABLED=0 go build -ldflags "-s -w   -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT)  -X main.GitTag=$(GIT_TAG)  -X main.GitRepo=$(GIT_REPOSITORY)  -X main.BuildDate=$(BUILD_DATE) " -o "$$OUTPUT_FILE" .; \
 		echo "打包为 ZIP (最大压缩级别): $$ZIP_FILE"; \
         (cd $(OUTPUT_DIR) && zip -9 "$(BINARY_NAME)-$$GOOS-$$GOARCH.zip" "$(BINARY_NAME)-$$GOOS-$$GOARCH$$EXT"); \
         echo "文件已打包: $$ZIP_FILE"; \
@@ -190,8 +183,8 @@ build-linux: ## 为Linux平台构建可执行文件
 		fi; \
 		OUTPUT_FILE="$(OUTPUT_DIR)/$(BINARY_NAME)-$$GOOS-$$GOARCH$$EXT"; \
 		echo "输出文件: $$OUTPUT_FILE"; \
-		echo "执行命令: GOOS=$$GOOS GOARCH=$$GOARCH go build -ldflags \"-s -w -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT)  -X main.GitTag=$(GIT_TAG)  -X main.GitRepo=$(GIT_REPOSITORY)  -X main.BuildDate=$(BUILD_DATE) -X main.InnerModel=$(MODEL) -X main.InnerApiKey=$(API_KEY) -X main.InnerApiUrl=$(API_URL)\" -o $$OUTPUT_FILE ."; \
-		GOOS=$$GOOS GOARCH=$$GOARCH CGO_ENABLED=0 go build -ldflags "-s -w   -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT)  -X main.GitTag=$(GIT_TAG)  -X main.GitRepo=$(GIT_REPOSITORY)  -X main.BuildDate=$(BUILD_DATE) -X main.InnerModel=$(MODEL) -X main.InnerApiKey=$(API_KEY) -X main.InnerApiUrl=$(API_URL)" -o "$$OUTPUT_FILE" .; \
+		echo "执行命令: GOOS=$$GOOS GOARCH=$$GOARCH go build -ldflags \"-s -w -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT)  -X main.GitTag=$(GIT_TAG)  -X main.GitRepo=$(GIT_REPOSITORY)  -X main.BuildDate=$(BUILD_DATE)\" -o $$OUTPUT_FILE ."; \
+		GOOS=$$GOOS GOARCH=$$GOARCH CGO_ENABLED=0 go build -ldflags "-s -w   -X main.Version=$(VERSION) -X main.GitCommit=$(GIT_COMMIT)  -X main.GitTag=$(GIT_TAG)  -X main.GitRepo=$(GIT_REPOSITORY)  -X main.BuildDate=$(BUILD_DATE)" -o "$$OUTPUT_FILE" .; \
 		upx -9 "$$OUTPUT_FILE"; \
 	done
 

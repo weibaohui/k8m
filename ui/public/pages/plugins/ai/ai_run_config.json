@@ -18,13 +18,6 @@
           "title": "AI运行配置",
           "body": [
             {
-              "name": "use_built_in_model",
-              "type": "switch",
-              "label": "内置参数",
-              "value": true,
-              "desc": "是否使用k8m内置AI大模型"
-            },
-            {
               "label": "默认模型",
               "type": "select",
               "name": "model_id",
@@ -47,8 +40,7 @@
                   "name": "api_url",
                   "label": "模型地址"
                 }
-              ],
-              "visibleOn": "!use_built_in_model"
+              ]
             },
             {
               "name": "max_history",

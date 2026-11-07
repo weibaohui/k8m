@@ -67,11 +67,9 @@ flowchart TD
 | 配置项     | 命令行参数                 | 环境变量                | 默认值                      | 描述             |
 |---------|-----------------------|---------------------|--------------------------|----------------|
 | 启用AI    | `--enable-ai`         | `ENABLE_AI`         | `true`                   | 启用或禁用 AI 功能    |
-| 使用内置模型  | `--use-builtin-model` | `USE_BUILTIN_MODEL` | `true`                   | 使用内置模型或自定义配置   |
-| API Key | `-k, --chatgpt-key`   | `OPENAI_API_KEY`    |                          | 用于语言模型的 API 密钥 |
-| API 地址  | `-u, --chatgpt-url`   | `OPENAI_API_URL`    |                          | 语言模型接口地址       |
-| 使用模型    | `-m, --chatgpt-model` | `OPENAI_MODEL`      | Qwen/Qwen2.5-7B-Instruct | 使用的模型名称        |
 | 任意选择启用  | `--any-select`        | `ANY_SELECT`        | `true`                   | 启用文本任意选择功能     |
+
+> AI 模型不再提供内置 API Key，需在管理页面的"AI模型配置"中自行添加模型（填写 API Key、API 地址、模型名称），并在"AI运行配置"中选择默认模型后方可使用。
 
 ---
 

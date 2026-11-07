@@ -16,20 +16,16 @@ import (
 )
 
 type aiService struct {
-	innerModel      string  // 内置模型
-	innerApiKey     string  // 内置模型API密钥
-	innerApiUrl     string  // 内置模型API地址
-	UseBuiltInModel bool    // 是否使用内置模型
-	AnySelect       bool    // 是否开启任意选择
-	FloatingWindow  bool    // 是否开启浮动窗口
-	MaxHistory      int32   // 最大历史记录数
-	MaxIterations   int32   // 最大迭代次数
-	ApiKey          string  // 自定义模型API密钥
-	ApiModel        string  // 自定义模型名称
-	ApiURL          string  // 自定义模型API地址
-	Think           bool    // 是否开启思考模式
-	Temperature     float32 // 温度参数，控制生成文本的随机性
-	TopP            float32 // Top-p采样参数，控制生成文本的多样性
+	AnySelect      bool    // 是否开启任意选择
+	FloatingWindow bool    // 是否开启浮动窗口
+	MaxHistory     int32   // 最大历史记录数
+	MaxIterations  int32   // 最大迭代次数
+	ApiKey         string  // 自定义模型API密钥
+	ApiModel       string  // 自定义模型名称
+	ApiURL         string  // 自定义模型API地址
+	Think          bool    // 是否开启思考模式
+	Temperature    float32 // 温度参数，控制生成文本的随机性
+	TopP           float32 // Top-p采样参数，控制生成文本的多样性
 }
 
 var (
@@ -51,21 +47,15 @@ func AIService() *aiService {
 	return aiInstance
 }
 
-func (c *aiService) SetVars(apikey, apiUrl, model string) {
-	c.innerModel = model
-	c.innerApiUrl = apiUrl
-	c.innerApiKey = apikey
-}
-
-// SetBuiltInModel 实现 api.AIInitializer 接口，设置内置 AI 模型的参数。
-func (c *aiService) SetBuiltInModel(apiKey, apiUrl, model string) {
-	c.SetVars(apiKey, apiUrl, model)
-}
-
 func (c *aiService) DefaultClient() (core.IAI, error) {
 	enable := c.IsEnabled()
 	if !enable {
 		return nil, fmt.Errorf("AI 功能未开启")
+	}
+
+	// 内置模型已移除，必须由用户自行配置API密钥与模型
+	if c.ApiKey == "" || c.ApiURL == "" || c.ApiModel == "" {
+		return nil, fmt.Errorf("未配置AI模型，请先在AI模型配置中添加模型并设为默认模型")
 	}
 
 	if local != nil {
@@ -103,11 +93,6 @@ func (c *aiService) openAIClient() (core.IAI, error) {
 		TopK:        0,
 		MaxTokens:   1000,
 		Think:       c.Think,
-	}
-	if c.UseBuiltInModel {
-		aiProvider.BaseURL = c.innerApiUrl
-		aiProvider.Password = c.innerApiKey
-		aiProvider.Model = c.innerModel
 	}
 
 	if c.Temperature > 0 {
@@ -165,36 +150,33 @@ func (c *aiService) UpdateFlagFromAIRunConfig() error {
 		return err
 	}
 
-	c.UseBuiltInModel = runConfig.UseBuiltInModel
 	c.AnySelect = runConfig.AnySelect
 	c.FloatingWindow = runConfig.FloatingWindow
 	c.MaxHistory = runConfig.MaxHistory
 	c.MaxIterations = runConfig.MaxIterations
 
-	// 如果不使用内置模型，加载模型配置
-	if !runConfig.UseBuiltInModel {
-		if runConfig.ModelID == 0 {
-			klog.Errorf("UpdateFlagFromAIRunConfig 未指定有效的模型ID")
-			return fmt.Errorf("未指定有效的模型ID")
-		}
+	// 加载用户自行配置的模型
+	if runConfig.ModelID == 0 {
+		klog.Errorf("UpdateFlagFromAIRunConfig 未指定有效的模型ID")
+		return fmt.Errorf("未指定有效的模型ID，请先在AI模型配置中添加模型并设为默认模型")
+	}
 
-		modelConfig := &models.AIModelConfig{ID: runConfig.ModelID}
-		modelConfig, err := modelConfig.GetOne(nil)
-		if err != nil {
-			klog.Errorf("UpdateFlagFromAIRunConfig 获取模型配置失败: %v", err)
-			return err
-		}
+	modelConfig := &models.AIModelConfig{ID: runConfig.ModelID}
+	modelConfig, err = modelConfig.GetOne(nil)
+	if err != nil {
+		klog.Errorf("UpdateFlagFromAIRunConfig 获取模型配置失败: %v", err)
+		return err
+	}
 
-		c.ApiKey = modelConfig.ApiKey
-		c.ApiModel = modelConfig.ApiModel
-		c.ApiURL = modelConfig.ApiURL
-		c.Think = modelConfig.Think
-		if modelConfig.Temperature > 0 {
-			c.Temperature = modelConfig.Temperature
-		}
-		if modelConfig.TopP > 0 {
-			c.TopP = modelConfig.TopP
-		}
+	c.ApiKey = modelConfig.ApiKey
+	c.ApiModel = modelConfig.ApiModel
+	c.ApiURL = modelConfig.ApiURL
+	c.Think = modelConfig.Think
+	if modelConfig.Temperature > 0 {
+		c.Temperature = modelConfig.Temperature
+	}
+	if modelConfig.TopP > 0 {
+		c.TopP = modelConfig.TopP
 	}
 
 	// 重置默认客户端，使新配置生效
