@@ -9,10 +9,9 @@ require (
 	github.com/duke-git/lancet/v2 v2.3.9
 	github.com/fatih/color v1.19.0
 	github.com/glebarez/sqlite v1.11.0
-	github.com/go-chi/chi/v5 v5.3.2
+	github.com/go-chi/chi/v5 v5.4.0
 	github.com/go-chi/cors v1.2.2
 	github.com/go-ldap/ldap/v3 v3.4.14
-	github.com/golang-jwt/jwt/v4 v4.5.2
 	github.com/google/gnostic v0.7.1
 	github.com/google/gnostic-models v0.7.1
 	github.com/gorilla/schema v1.4.1
